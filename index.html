@@ -113,7 +113,6 @@
 
     <div class="section-card">
         <h3 class="section-title">💡 互连结构微观探索 & 动态数据雷达</h3>
-        <p style="font-size: 14px; color: #64748b; margin-top:-10px;">点击封装卡片，右侧 Canvas 引擎将动态渲染真实量化指标，下方展现学术显微切片图：</p>
         
         <div class="explore-grid">
             <div class="visual-board">
@@ -154,9 +153,9 @@
                 <div id="exploreText" class="explore-text"></div>
                 <div class="explore-img-container">
                     <div style="font-size: 11px; color:#94a3b8; margin-bottom:6px;">🔬 真实电子显微截面（SEM）/ 压接结构</div>
-                    <img id="img-bga" class="explore-img" src="./bga.png" alt="BGA 真实 SEM 截面图">
-                    <img id="img-cga" class="explore-img" src="./cga.png" alt="CGA 真实细长焊料柱显微结构">
-                    <img id="img-lga" class="explore-img" src="./lga.png" alt="LGA 弹性 Socket 机械压接剖面图">
+                    <img id="img-bga" class="explore-img" src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80" alt="BGA 真实 SEM 截面图">
+                    <img id="img-cga" class="explore-img" src="https://images.unsplash.com/photo-1601524909162-be87252be298?auto=format&fit=crop&w=400&q=80" alt="CGA 真实细长焊料柱显微结构">
+                    <img id="img-lga" class="explore-img" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80" alt="LGA 弹性 Socket 机械压接剖面图">
                 </div>
             </div>
         </div>
@@ -247,7 +246,7 @@
                 <ul class="options-list">
                     <li class="option-item" data-value="A">A. 封装体内引线框架热膨胀系数不匹配导致断裂</li>
                     <li class="option-item" data-value="B">B. 外围引脚节距（Pitch）逼近工艺极限，板级装配时极易发生焊膏桥连短路</li>
-                    <li class="option-item" data-value="C">C. 周边引线过长，导致严重的声学噪声耦合</li>
+                    <li class="option-item" data-value="C">C. <b>C.</b> 周边引线过长，导致严重的声学噪声耦合</li>
                     <li class="option-item" data-value="D">D. 二维边缘引脚极易吸潮导致塑封体发生“爆米花”效应</li>
                 </ul>
                 <div class="feedback"></div>
@@ -406,7 +405,7 @@
         initRadarCanvas();
     });
 
-    // 彻底修复：用 HTML5 Canvas 纯前端实现数据驱动的“真雷达图”绘制引擎
+    // 用 HTML5 Canvas 纯前端实现数据驱动的“真雷达图”绘制引擎
     function drawRadarChart(type) {
         const canvas = document.getElementById('radarCanvas');
         if (!canvas) return;
@@ -521,7 +520,6 @@
         const shiftX = dT * 0.25; 
         
         document.getElementById('simChip').style.transform = `translateX(calc(-50% - ${shiftX * 0.4}px))`;
-        // 正确运作：已经绑定了正确的 DOM 节点，不再报 null 异常
         document.getElementById('simPCB').style.transform = `translateX(calc(-50% + ${shiftX * 0.6}px))`;
         
         const skewAngle = dT * 0.15;
@@ -640,7 +638,7 @@
 
         if (userValue === correctAnswer) {
             feedbackBox.className = 'feedback correct';
-            feedbackBox.innerHTML = `<div class="feedback-title">🎉 回答正确！</div>`;
+            feedbackBox.innerHTML = `<div class="feedback-title">🎉 回回答正确！</div>`;
         } else {
             feedbackBox.className = 'feedback wrong';
             feedbackBox.innerHTML = `<div class="feedback-title">❌ 回答错误。你选择了 ${userValue}，正确答案是 ${correctAnswer}。</div>`;
