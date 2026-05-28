@@ -172,6 +172,32 @@
         .feedback.wrong { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fecaca; }
         .option-explanation-list { margin-top: 10px; padding-left: 20px; font-size: 13px; color: #475569; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px; }
         .option-explanation-list li { margin-bottom: 5px; }
+
+        /* 失效模式配对小游戏 */
+        .match-intro { font-size: 13px; color: #64748b; margin-top: -10px; }
+        .match-board { display: grid; grid-template-columns: 1fr 1.1fr; gap: 18px; margin-top: 18px; }
+        .match-column-title { font-size: 13px; font-weight: 700; color: var(--primary-color); margin-bottom: 10px; }
+        .failure-list, .cause-pool { display: flex; flex-direction: column; gap: 10px; }
+        .failure-item { display: grid; grid-template-columns: 120px 1fr; gap: 10px; align-items: stretch; }
+        .failure-name { display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: 700; color: #1e293b; }
+        .match-slot { min-height: 54px; display: flex; align-items: center; padding: 8px 10px; border: 2px dashed #cbd5e1; border-radius: 6px; background: #f8fafc; color: #94a3b8; font-size: 12px; line-height: 1.45; transition: all 0.2s ease; }
+        .match-slot.drag-over, .match-slot.slot-selected { border-color: var(--secondary-color); background: #eff6ff; color: #1e3a8a; }
+        .match-slot.correct { border-color: var(--success-color); background: #dcfce7; color: #14532d; }
+        .match-slot.wrong { border-color: var(--error-color); background: #fee2e2; color: #7f1d1d; }
+        .cause-card { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #334155; font-size: 12px; line-height: 1.45; cursor: grab; transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; }
+        .cause-card:hover { border-color: var(--secondary-color); box-shadow: 0 3px 10px rgba(30,58,138,0.12); transform: translateY(-1px); }
+        .cause-card.dragging { opacity: 0.55; }
+        .cause-card.selected { border-color: var(--secondary-color); background: #eff6ff; box-shadow: 0 0 0 2px rgba(59,130,246,0.14); }
+        .cause-card.locked { cursor: default; opacity: 0.78; }
+        .match-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+        .match-actions .interactive-btn { width: auto; min-width: 150px; }
+        .match-actions .reset-btn { width: auto; min-width: 130px; padding: 10px 15px; font-size: 14px; border-radius: 6px; }
+        .match-feedback { margin-top: 12px; padding: 12px; border-radius: 6px; font-size: 13px; display: none; }
+        @media (max-width: 760px) {
+            .match-board { grid-template-columns: 1fr; }
+            .failure-item { grid-template-columns: 1fr; }
+            .match-actions .interactive-btn, .match-actions .reset-btn { width: 100%; }
+        }
         .reset-btn { background-color: #64748b; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: background 0.2s; }
         .reset-btn:hover { background-color: #475569; }
     </style>
@@ -338,6 +364,26 @@
     </div>
 
     <div class="section-card">
+        <h3 class="section-title">🧩 焊点失效模式配对小游戏</h3>
+        <p class="match-intro">把右侧“成因 / 检测特征”拖到左侧对应失效现象旁；也可以先点选右侧卡片，再点左侧空槽完成配对。</p>
+        <div class="match-board">
+            <div>
+                <div class="match-column-title">失效现象</div>
+                <div class="failure-list" id="failureMatchList"></div>
+            </div>
+            <div>
+                <div class="match-column-title">成因 / 检测特征</div>
+                <div class="cause-pool" id="causePool"></div>
+            </div>
+        </div>
+        <div class="match-actions">
+            <button type="button" class="interactive-btn" id="btnCheckMatch">判定配对结果</button>
+            <button type="button" class="reset-btn" id="btnResetMatch">重置本题</button>
+        </div>
+        <div id="matchFeedback" class="match-feedback"></div>
+    </div>
+
+    <div class="section-card">
         <h3 class="section-title">📝 随堂核心概念通关测试（选项即点即评）</h3>
         <form id="quizForm">
             <div class="question-card" id="q1" data-answer="B">
@@ -469,7 +515,17 @@
         q8: { A: "❌ A错：爆米花效应属于瞬间高温（如再次过回流焊）时发生的失效。", B: "❌ B错：底层主驱动力是机械应力而非电化学腐蚀。", C: "❌ C错：常规温变循环内不涉及破坏性的晶格大相变。", D: "🎉 D对：由于硅芯片、封装基板以及 PCB 主板之间的热膨胀系数（CTE）严重不匹配，温变下产生周期性剪切应变导致热疲劳裂纹。" }
     };
 
+    const failureMatchItems = [
+        { id: "thermal", name: "热疲劳裂纹", cause: "CTE 错配与温度循环共同作用，远离中性点的角焊点累积剪切疲劳，裂纹常从界面或焊点边缘萌生。" },
+        { id: "hip", name: "HIP 枕头效应", cause: "回流焊中封装翘曲使焊球与锡膏暂时分离，表面氧化后未完全冶金熔合，截面像“枕头叠放”。" },
+        { id: "kirkendall", name: "Kirkendall 空洞", cause: "Cu 与 Sn 扩散速率不对称，在 Cu3Sn/Cu 界面遗留并聚集空位，SEM 可见界面微空洞。" },
+        { id: "popcorn", name: "爆米花效应", cause: "塑封体吸湿后经历回流高温，水汽急剧膨胀造成分层或开裂，常用 C-SAM 做无损筛查。" },
+        { id: "bridge", name: "桥连", cause: "焊膏量过多、焊盘间距过小或贴装偏移，回流后相邻焊点被焊料连通，电测表现为短路。" },
+        { id: "open", name: "开路", cause: "焊球塌陷不足、焊盘污染、共面性差或裂纹贯穿，使互连未形成连续导电通路，电测表现为断路。" }
+    ];
+
     let currentRadarType = 'bga';
+    let selectedCauseCard = null;
 
     document.addEventListener("DOMContentLoaded", () => {
         // 绑定卡片切换
@@ -497,12 +553,15 @@
         document.getElementById('imcSlider').addEventListener('input', runImcEvolution);
         document.getElementById('btnFA').addEventListener('click', evaluateFA);
         document.getElementById('btnDesign').addEventListener('click', evaluateDesign);
+        document.getElementById('btnCheckMatch').addEventListener('click', checkFailureMatches);
+        document.getElementById('btnResetMatch').addEventListener('click', resetFailureMatchGame);
         document.getElementById('btnReset').addEventListener('click', resetQuiz);
 
         // 默认初始化
         switchExplore('bga');
         runCteSimulation();
         initRadarCanvas();
+        initFailureMatchGame();
     });
 
     // 用 HTML5 Canvas 绘制雷达图
@@ -757,6 +816,141 @@
         if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
 
+    function initFailureMatchGame() {
+        const list = document.getElementById('failureMatchList');
+        const pool = document.getElementById('causePool');
+        const feedback = document.getElementById('matchFeedback');
+        if (!list || !pool) return;
+
+        list.innerHTML = failureMatchItems.map(item => `
+            <div class="failure-item">
+                <div class="failure-name">${item.name}</div>
+                <div class="match-slot" data-answer="${item.id}" tabindex="0">拖入对应成因 / 检测特征</div>
+            </div>
+        `).join('');
+
+        const shuffled = [...failureMatchItems].sort((a, b) => a.cause.localeCompare(b.cause, 'zh-CN'));
+        pool.innerHTML = shuffled.map(item => `
+            <div class="cause-card" draggable="true" data-match="${item.id}" tabindex="0">${item.cause}</div>
+        `).join('');
+
+        selectedCauseCard = null;
+        feedback.style.display = 'none';
+        feedback.innerHTML = '';
+
+        document.querySelectorAll('.cause-card').forEach(card => {
+            card.addEventListener('dragstart', event => {
+                event.dataTransfer.setData('text/plain', card.dataset.match);
+                card.classList.add('dragging');
+            });
+            card.addEventListener('dragend', () => card.classList.remove('dragging'));
+            card.addEventListener('click', () => selectCauseCard(card));
+            card.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    selectCauseCard(card);
+                }
+            });
+        });
+
+        document.querySelectorAll('.match-slot').forEach(slot => {
+            slot.addEventListener('dragover', event => {
+                event.preventDefault();
+                slot.classList.add('drag-over');
+            });
+            slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+            slot.addEventListener('drop', event => {
+                event.preventDefault();
+                slot.classList.remove('drag-over');
+                const matchId = event.dataTransfer.getData('text/plain');
+                const card = document.querySelector(`.cause-card[data-match="${matchId}"]`);
+                placeCauseCard(card, slot);
+            });
+            slot.addEventListener('click', () => {
+                if (selectedCauseCard) placeCauseCard(selectedCauseCard, slot);
+            });
+            slot.addEventListener('keydown', event => {
+                if ((event.key === 'Enter' || event.key === ' ') && selectedCauseCard) {
+                    event.preventDefault();
+                    placeCauseCard(selectedCauseCard, slot);
+                }
+            });
+        });
+    }
+
+    function selectCauseCard(card) {
+        if (!card || card.classList.contains('locked')) return;
+        document.querySelectorAll('.cause-card').forEach(item => item.classList.remove('selected'));
+        selectedCauseCard = card;
+        card.classList.add('selected');
+        document.querySelectorAll('.match-slot').forEach(slot => slot.classList.add('slot-selected'));
+    }
+
+    function placeCauseCard(card, slot) {
+        if (!card || !slot) return;
+        const pool = document.getElementById('causePool');
+        const originSlot = card.closest('.match-slot');
+        const existing = slot.querySelector('.cause-card');
+        if (existing) pool.appendChild(existing);
+        if (originSlot && originSlot !== slot) resetMatchSlotPlaceholder(originSlot);
+
+        slot.innerHTML = '';
+        slot.appendChild(card);
+        slot.classList.remove('correct', 'wrong', 'slot-selected');
+        card.classList.remove('selected');
+        selectedCauseCard = null;
+        document.querySelectorAll('.match-slot').forEach(item => item.classList.remove('slot-selected'));
+        document.getElementById('matchFeedback').style.display = 'none';
+    }
+
+    function resetMatchSlotPlaceholder(slot) {
+        slot.innerHTML = '拖入对应成因 / 检测特征';
+        slot.classList.remove('correct', 'wrong', 'drag-over');
+    }
+
+    function checkFailureMatches() {
+        const slots = document.querySelectorAll('.match-slot');
+        const feedback = document.getElementById('matchFeedback');
+        let correctCount = 0;
+        let filledCount = 0;
+
+        slots.forEach(slot => {
+            const card = slot.querySelector('.cause-card');
+            slot.classList.remove('correct', 'wrong');
+            if (!card) return;
+            filledCount++;
+            if (card.dataset.match === slot.dataset.answer) {
+                correctCount++;
+                slot.classList.add('correct');
+            } else {
+                slot.classList.add('wrong');
+            }
+        });
+
+        feedback.style.display = 'block';
+        if (filledCount < failureMatchItems.length) {
+            feedback.style.backgroundColor = '#fef3c7';
+            feedback.style.color = '#78350f';
+            feedback.innerHTML = `还差 ${failureMatchItems.length - filledCount} 项没有配对。先把所有成因卡片放入左侧空槽，再判定会更完整。`;
+        } else if (correctCount === failureMatchItems.length) {
+            feedback.style.backgroundColor = '#dcfce7';
+            feedback.style.color = '#14532d';
+            feedback.innerHTML = `🎉 全部正确！你已经把工艺失效、材料扩散失效和热机械疲劳失效区分开了。`;
+            document.querySelectorAll('.cause-card').forEach(card => {
+                card.classList.add('locked');
+                card.draggable = false;
+            });
+        } else {
+            feedback.style.backgroundColor = '#fee2e2';
+            feedback.style.color = '#7f1d1d';
+            feedback.innerHTML = `已完成 ${correctCount}/${failureMatchItems.length} 项。红色框里的配对还需要调整，重点区分“热循环疲劳”“回流翘曲虚焊”和“扩散空洞”。`;
+        }
+    }
+
+    function resetFailureMatchGame() {
+        initFailureMatchGame();
+    }
+
     function checkAnswer(qId, userValue) {
         const card = document.getElementById(qId);
         if (card.classList.contains('locked')) return;
@@ -807,6 +1001,7 @@
         document.getElementById('imcSlider').value = 0;
         document.getElementById('underfillCheckbox').checked = false;
         
+        resetFailureMatchGame();
         runCteSimulation();
         runImcEvolution();
         switchExplore('bga');
