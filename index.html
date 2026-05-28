@@ -44,7 +44,7 @@
         .structure-icon { font-size: 24px; }
         .structure-title { font-weight: bold; color: var(--primary-color); }
         
-        /* 真·数据驱动雷达图面板 */
+        /* 数据驱动雷达图面板 */
         .radar-panel { flex: 1; min-width: 280px; background: #fafafa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .radar-container { width: 220px; height: 220px; position: relative; margin: 10px 0; }
         #radarCanvas { width: 120%; height: 120%; position: absolute; top: -10%; left: -10%; }
@@ -53,31 +53,79 @@
         .explore-flex { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
         .explore-text { flex: 3; min-width: 260px; font-size: 14px; }
         .explore-img-container { flex: 2; min-width: 240px; text-align: center; background: white; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
-        .explore-img { display: none; width: 100%; height: auto; max-height: 180px; object-fit: contain; }
+        .explore-img { display: none; width: 100%; height: auto; max-height: 180px; object-fit: contain; margin: 0 auto; }
 
-        /* CTE模拟器增强 */
-        .sim-container { display: flex; flex-direction: column; gap: 20px; background: #1e293b; color: #f8fafc; padding: 20px; border-radius: 8px; }
-        .cte-visual { height: 160px; position: relative; border-bottom: 4px solid #64748b; overflow: hidden; background: #0f172a; border-radius: 6px; }
-        .layer { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; font-size: 12px; font-weight: bold; border-radius: 4px; transition: transform 0.1s ease; }
+        /* CTE 模拟器：升级为真正的垂直分层堆叠模型 */
+        .sim-container { display: flex; flex-direction: column; gap: 20px; background: #1e293b; color: #f8fafc; padding: 25px; border-radius: 8px; }
         
-        /* 丰富封装层次样式 */
-        .layer-chip { top: 10px; width: 140px; height: 22px; background: #38bdf8; color: #0f172a; line-height: 22px; z-index: 5; }
-        .layer-substrate { top: 32px; width: 240px; height: 20px; background: #6366f1; color: white; line-height: 20px; z-index: 4; font-size: 11px; }
-        .layer-pcb { bottom: 10px; width: 340px; height: 25px; background: #059669; color: white; line-height: 25px; }
+        .cte-visual { 
+            height: 250px; 
+            position: relative; 
+            background: #0f172a; 
+            border-radius: 6px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            padding: 10px 0;
+            box-sizing: border-box;
+        }
+        
+        /* 剔除原 top/left 绝对定位，依靠标准流垂直堆叠，消除重叠 */
+        .package-layer { 
+            text-align: center; 
+            font-size: 11px; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            line-height: 24px;
+            height: 24px;
+            transition: transform 0.1s ease;
+            box-sizing: border-box;
+        }
+        .layer-chip { width: 150px; background: #38bdf8; color: #0f172a; z-index: 5; }
+        .layer-substrate { width: 250px; background: #6366f1; color: white; margin-top: 2px; z-index: 4; }
+        .layer-pcb { width: 350px; background: #059669; color: white; border-bottom: 4px solid #047857; z-index: 1; }
 
-        /* 真正的球形焊点与包装容器 */
-        .joint-container { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); display: flex; justify-content: space-between; width: 210px; z-index: 3; }
+        /* 焊球行容器：依靠 margin 弹性拉开 Standoff Height */
+        .bga-joints-row { 
+            display: flex; 
+            justify-content: space-between; 
+            width: 210px; 
+            margin-top: 14px;     /* 上方 Standoff Height */
+            margin-bottom: 24px;  /* 下方 Standoff 高度，同时预留给 DNP 标签 */
+            position: relative; 
+            z-index: 3;
+        }
+        
         .solder-ball-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; }
-        .solder-ball { width: 24px; height: 24px; background: #cbd5e1; border-radius: 50%; transition: all 0.1s ease; transform-origin: top center; position: relative; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.3); }
+        
+        /* 圆润真实的球体 */
+        .solder-ball { 
+            width: 24px; 
+            height: 24px; 
+            background: #cbd5e1; 
+            border-radius: 50%; 
+            transition: all 0.1s ease; 
+            transform-origin: top center; /* 以基板接触面为轴心进行剪切歪斜 */
+            position: relative; 
+            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2); 
+        }
 
-        /* DNP 文本微型标签 */
-        .dnp-tag { font-size: 9px; color: #94a3b8; margin-top: 4px; font-family: monospace; }
+        /* DNP 标签死死黏在 Wrapper 底部，绝不乱飞 */
+        .dnp-tag { 
+            position: absolute;
+            bottom: -20px;
+            font-size: 9px; 
+            color: #94a3b8; 
+            font-family: monospace; 
+            white-space: nowrap;
+        }
 
         /* 渐进式裂纹线条 */
-        .crack-line-progressive { position: absolute; top: 2px; left: 10%; width: 0%; height: 3px; background: var(--error-color); transition: width 0.1s ease; border-radius: 2px; }
+        .crack-line-progressive { position: absolute; top: 1px; left: 15%; width: 0%; height: 3px; background: var(--error-color); transition: width 0.1s ease; border-radius: 2px; }
 
-        /* Underfill 胶层半透明视觉表现 */
-        .underfill-layer { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); width: 230px; height: 26px; background: rgba(245, 158, 11, 0.35); border: 1px dashed #f59e0b; border-radius: 4px; z-index: 2; pointer-events: none; }
+        /* Underfill 胶层在物理层中间渲染 */
+        .underfill-layer { position: absolute; top: 92px; width: 235px; height: 30px; background: rgba(245, 158, 11, 0.35); border: 1px dashed #f59e0b; border-radius: 4px; z-index: 2; pointer-events: none; }
 
         .slider-box { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; }
         .slider-box input { flex: 1; }
@@ -122,12 +170,12 @@
 
 <div class="container">
     <header>
-        <h1>9.3 阵列封装 高级交互控制台</h1>
+        <h1>9.3 阵列封装</h1>
         <p>电子教材配套微电子封装技术互动平台</p>
     </header>
 
     <div class="section-card">
-        <h3 class="section-title">💡 互连结构微观探索 & 动态数据雷达</h3>
+        <h3 class="section-title">💡 互连结构探索 & 动态数据雷达</h3>
         
         <div class="explore-grid">
             <div class="visual-board">
@@ -168,17 +216,9 @@
                 <div id="exploreText" class="explore-text"></div>
                 <div class="explore-img-container">
                     <div style="font-size: 11px; color:#94a3b8; margin-bottom:6px;">🔬 真实结构图</div>
-<img id="img-bga" class="explore-img"
-     src="https://i.ibb.co/TByW5kSD/BGA-SEM.png"
-     alt="BGA 焊球 SEM 真实截面图">
-
-<img id="img-cga" class="explore-img"
-     src="https://i.ibb.co/LB27H6h/CGA.png"
-     alt="CGA 圆柱阵列封装结构图">
-
-<img id="img-lga" class="explore-img"
-     src="https://i.ibb.co/HLXzxwy0/LGA-SEM.png"
-     alt="LGA 触点阵列 Socket 压接结构图">
+                    <img id="img-bga" class="explore-img" src="https://i.ibb.co/TByW5kSD/BGA-SEM.png" alt="BGA 焊球 SEM 真实截面图">
+                    <img id="img-cga" class="explore-img" src="https://i.ibb.co/LB27H6h/CGA.png" alt="CGA 圆柱阵列封装结构图">
+                    <img id="img-lga" class="explore-img" src="https://i.ibb.co/HLXzxwy0/LGA-SEM.png" alt="LGA 触点阵列 Socket 压接结构图">
                 </div>
             </div>
         </div>
@@ -189,34 +229,34 @@
         <p style="font-size: 14px; color: #64748b; margin-top:-10px;">调节服役环境温度，由于芯片、封装基板与 PCB 的 CTE 错配，观察应变公式 $\gamma \propto (\alpha_{\text{PCB}} - \alpha_{\text{pkg}}) \cdot \Delta T \cdot \text{DNP}$ 的实际映射表现：</p>
         <div class="sim-container">
             <div class="cte-visual">
-                <div id="simChip" class="layer layer-chip">Si 芯片 (Die) [$\alpha \approx 3\,\text{ppm}/^\circ\text{C}$]</div>
+                <div id="simChip" class="package-layer layer-chip">Si 芯片 (Die) [$\alpha \approx 3\,\text{ppm}/^\circ\text{C}$]</div>
                 
-                <div id="simSubstrate" class="layer layer-substrate">封装基板 (Substrate) [$\alpha \approx 7\,\text{ppm}/^\circ\text{C}$]</div>
+                <div id="simSubstrate" class="package-layer layer-substrate">封装基板 (Substrate) [$\alpha \approx 7\,\text{ppm}/^\circ\text{C}$]</div>
                 
                 <div id="underfillEl" class="underfill-layer" style="display:none;"></div>
 
-                <div class="joint-container">
+                <div class="bga-joints-row">
                     <div class="solder-ball-wrapper" id="ballWrapperL">
                         <div class="solder-ball" id="jointL">
                             <div class="crack-line-progressive" id="crackL"></div>
                         </div>
-                        <div class="dnp-tag">Max DNP</div>
+                        <div class="dnp-tag">Max DNP (角焊球)</div>
                     </div>
                     
                     <div class="solder-ball-wrapper" id="ballWrapperM">
                         <div class="solder-ball" id="jointM"></div>
-                        <div class="dnp-tag">DNP ≈ 0</div>
+                        <div class="dnp-tag">DNP ≈ 0 (中性点)</div>
                     </div>
                     
                     <div class="solder-ball-wrapper" id="ballWrapperR">
                         <div class="solder-ball" id="jointR">
                             <div class="crack-line-progressive" id="crackR"></div>
                         </div>
-                        <div class="dnp-tag">Max DNP</div>
+                        <div class="dnp-tag">Max DNP (角焊球)</div>
                     </div>
                 </div>
                 
-                <div id="simPCB" class="layer layer-pcb">FR-4 PCB 主板 [$\alpha \approx 16\,\text{ppm}/^\circ\text{C}$]</div>
+                <div id="simPCB" class="package-layer layer-pcb">FR-4 PCB 主板 [$\alpha \approx 16\,\text{ppm}/^\circ\text{C}$]</div>
             </div>
             <div class="slider-box">
                 <span>环境温度 ($T$): </span>
@@ -295,7 +335,7 @@
                 <ul class="options-list">
                     <li class="option-item" data-value="A">A. 封装体内引线框架热膨胀系数不匹配导致断裂</li>
                     <li class="option-item" data-value="B">B. 外围引脚节距（Pitch）逼近工艺极限，板级装配时极易发生焊膏桥连短路</li>
-                    <li class="option-item" data-value="C">C. C. 周边引线过长，导致严重的声学噪声耦合</li>
+                    <li class="option-item" data-value="C">C. 周边引线过长，导致严重的声学噪声耦合</li>
                     <li class="option-item" data-value="D">D. 二维边缘引脚极易吸潮导致塑封体发生“爆米花”效应</li>
                 </ul>
                 <div class="feedback"></div>
@@ -399,7 +439,7 @@
         }
     };
 
-    // 雷达图的核心五维动态量化数据
+    // 雷达图数据
     const radarMetrics = {
         bga: { scores: [0.9, 0.7, 0.75, 0.5, 0.2], desc: "BGA 指标均衡，I/O 密度极高，但在极端恶劣温变下的板级可靠性受制于机械剪切应力。" },
         cga: { scores: [0.7, 0.6, 0.45, 0.95, 0.3], desc: "CGA 在高应力恶劣环境下可靠性达到顶峰，但其高细长柱体带来的寄生电感限制了超高速信号表现。" },
@@ -455,7 +495,7 @@
         initRadarCanvas();
     });
 
-    // 用 HTML5 Canvas 纯前端实现数据驱动的“真雷达图”绘制引擎
+    // 用 HTML5 Canvas 绘制雷达图
     function drawRadarChart(type) {
         const canvas = document.getElementById('radarCanvas');
         if (!canvas) return;
@@ -469,7 +509,7 @@
 
         ctx.clearRect(0, 0, width, height);
 
-        // 1. 绘制蜘蛛网背景底图
+        // 1. 绘制网格背景
         ctx.strokeStyle = '#cbd5e1';
         ctx.lineWidth = 1;
         for (let j = 1; j <= 4; j++) {
@@ -486,7 +526,7 @@
             ctx.stroke();
         }
 
-        // 2. 绘制五维坐标轴轴引线
+        // 2. 绘制轴线
         ctx.beginPath();
         for (let i = 0; i < totalSides; i++) {
             const angle = (i * 2 * Math.PI / totalSides) - Math.PI / 2;
@@ -495,7 +535,7 @@
         }
         ctx.stroke();
 
-        // 3. 绘制文字文本标签
+        // 3. 标签
         ctx.font = '11px sans-serif';
         ctx.fillStyle = '#64748b';
         ctx.textAlign = 'center';
@@ -507,7 +547,7 @@
             ctx.fillText(radarLabels[i], textX, textY);
         }
 
-        // 4. 根据当前封装类型，动态提取数据并绘制数据层多边形
+        // 4. 数据多边形
         const scores = radarMetrics[type].scores;
         ctx.fillStyle = 'rgba(59, 130, 246, 0.35)';
         ctx.strokeStyle = '#3b82f6';
@@ -525,7 +565,7 @@
         ctx.fill();
         ctx.stroke();
 
-        // 5. 绘制各个数据特征顶点小圆点
+        // 5. 顶点圆圈
         ctx.fillStyle = '#1e3a8a';
         for (let i = 0; i < totalSides; i++) {
             const angle = (i * 2 * Math.PI / totalSides) - Math.PI / 2;
@@ -540,7 +580,6 @@
         drawRadarChart(currentRadarType);
     }
 
-    // 联动控制切换
     function switchExplore(type) {
         currentRadarType = type;
         document.getElementById('exploreDetailBox').style.display = 'block';
@@ -551,44 +590,36 @@
         document.querySelectorAll('.explore-img').forEach(img => img.style.display = 'none');
         document.getElementById(`img-${type}`).style.display = 'block';
 
-        // 触发雷达图 Canvas 数据重绘
         drawRadarChart(type);
         document.getElementById('radarDesc').innerText = radarMetrics[type].desc;
         
-        // 确保新排版的 MathJax 能及时捕捉到文本块变更进行二次美化渲染
-        if (window.MathJax && window.MathJax.typeset) {
-            window.MathJax.typeset();
-        }
+        if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
 
-    // 动态模拟 ①: CTE 深度工程化变形剪切
+    // 动态模拟 ①: CTE 重构完美版控制逻辑
     function runCteSimulation() {
         const T = parseInt(document.getElementById('tempSlider').value);
         const hasUnderfill = document.getElementById('underfillCheckbox').checked;
         document.getElementById('tempDisplay').innerText = `${T} °C`;
         
-        // 显示或隐藏 Underfill 视觉层
         document.getElementById('underfillEl').style.display = hasUnderfill ? 'block' : 'none';
         
-        const dT = T - 25; // 计算温差 ΔT
+        const dT = T - 25; // 计算相对室温温差
         
-        // 模拟各层材料由于 CTE 错配产生的相对剪切位移量
-        // Si(3 ppm) < Substrate(7 ppm) < PCB(16 ppm)
-        const chipShift = dT * 0.1;
-        const subShift = dT * 0.25;
-        const pcbShift = dT * 0.65;
+        // 【视觉升级】：通过对齐中心点，利用 scaleX 模拟热膨胀系数差异导致的对称各层延展变化
+        // α(PCB:16) > α(Substrate:7) > α(Die:3)
+        const chipScale = 1 + (dT * 0.0004);
+        const subScale = 1 + (dT * 0.0009);
+        const pcbScale = 1 + (dT * 0.0022);
         
-        document.getElementById('simChip').style.transform = `translateX(calc(-50% - ${chipShift}px))`;
-        document.getElementById('simSubstrate').style.transform = `translateX(calc(-50% - ${subShift}px))`;
-        document.getElementById('simPCB').style.transform = `translateX(calc(-50% + ${pcbShift}px))`;
+        document.getElementById('simChip').style.transform = `scaleX(${chipScale})`;
+        document.getElementById('simSubstrate').style.transform = `scaleX(${subScale})`;
+        document.getElementById('simPCB').style.transform = `scaleX(${pcbScale})`;
         
-        // 引入 DNP (Distance from Neutral Point) 概念控制角焊球应变
-        // 剪切角公式: γ ∝ Δα * ΔT * DNP
-        let baseSkew = dT * 0.22;
-        
-        // 如果引入了 Underfill，高分子胶层会全局分担并锁住大部分剪切应力（形变降低至原先的 25%）
+        // 剪切应变核心公式物理体现：γ ∝ Δα * ΔT * DNP
+        let baseSkew = dT * 0.24;
         if (hasUnderfill) {
-            baseSkew *= 0.25;
+            baseSkew *= 0.25; // Underfill 锁住并均匀分散 75% 的形变应力
         }
 
         const jointL = document.getElementById('jointL');
@@ -598,50 +629,46 @@
         const crackR = document.getElementById('crackR');
         const feedback = document.getElementById('simFeedback');
 
-        // 核心物理体现：中心焊球（DNP ≈ 0）几乎不发生剪切偏转
-        document.getElementById('ballWrapperM').style.transform = `translateX(-50%)`;
-        jointM.style.transform = `skewX(${baseSkew * 0.05}deg)`;
+        // 【中性点锚定】：中性轴正中心 DNP ≈ 0，几乎不产生剪切位移差
+        jointM.style.transform = `skewX(${baseSkew * 0.02}deg)`;
         
-        // 外围角焊球（DNP 最大）承受饱满的剪切形变与平移
-        const edgeSkew = baseSkew * 1.0; 
-        jointL.style.transform = `skewX(${edgeSkew}deg)`;
-        jointR.style.transform = `skewX(${edgeSkew}deg)`;
+        // 【外围角焊点】：远离中性轴，DNP 最大，承受全部错配剪切
+        const edgeSkewL = baseSkew * 1.0; 
+        const edgeSkewR = baseSkew * 1.0; 
+        
+        jointL.style.transform = `skewX(${edgeSkewL}deg)`;
+        jointR.style.transform = `skewX(${edgeSkewR}deg)`;
 
-        // 计算实际承受的等效剪切应变指标（用于判断渐进失效的阈值）
-        const effectiveStrain = Math.abs(edgeSkew);
+        const effectiveStrain = Math.abs(edgeSkewL);
 
-        // 渐进式失效分析四阶段状态机
+        // 4阶段渐进失效逻辑判断
         if (effectiveStrain === 0) {
-            // 阶段 1: 无应变
             jointL.style.background = '#cbd5e1';
             jointR.style.background = '#cbd5e1';
             crackL.style.width = '0%';
             crackR.style.width = '0%';
-            feedback.innerHTML = `✨ <strong>热平衡态 ($25^\\circ\\text{C}$):</strong> 结构内部零热应力，处于完美弹性安全区。`;
+            feedback.innerHTML = `✨ <strong>热平衡态 ($25^\\circ\\text{C}$):</strong> 封装各结构层内部无本征剪切热应力，处于完美弹性安全区。`;
         } 
         else if (effectiveStrain > 0 && effectiveStrain <= 6) {
-            // 阶段 2: 弹性变形 / 轻微蠕变
             jointL.style.background = '#cbd5e1';
             jointR.style.background = '#cbd5e1';
             crackL.style.width = '0%';
             crackR.style.width = '0%';
-            feedback.innerHTML = `⏳ <strong>弹性与塑性蠕变阶段:</strong> 应变 $\\gamma \\propto \\Delta\\alpha \\cdot \\Delta T \\cdot \\text{DNP}$ 开始积攒。由于中心对称性，<strong>中心焊球几乎不受剪切应力，而最外侧角焊球形变最显著</strong>。`;
+            feedback.innerHTML = `⏳ <strong>弹性与塑性蠕变阶段:</strong> 应变积攒中。由于中心对称性，<strong>中心中性点焊球几乎无影响，而最外侧角焊球由于 DNP 最大，形变最显著</strong>。`;
         } 
-        else if (effectiveStrain > 6 && effectiveStrain <= 13) {
-            // 阶段 3: 萌生微裂纹
-            jointL.style.background = '#fbbf24'; // 变黄
+        else if (effectiveStrain > 6 && effectiveStrain <= 14) {
+            jointL.style.background = '#fbbf24'; // 变黄警示
             jointR.style.background = '#fbbf24';
-            crackL.style.width = '45%'; // 裂纹显现 45%
+            crackL.style.width = '45%'; // 局部萌生裂纹
             crackR.style.width = '45%';
-            feedback.innerHTML = `🚧 <strong>微裂纹萌生 (Micro-cracking):</strong> 累积的热疲劳导致外围角焊球的晶粒粗化，在应力集中最高的界面根部<strong>已萌生微小裂纹</strong>！${hasUnderfill ? '（Underfill 已有效延缓并减小了形变损伤）' : ''}`;
+            feedback.innerHTML = `🚧 <strong>微裂纹萌生 (Micro-cracking):</strong> 累积热应力导致最外侧角焊球内部晶粒粗化，在应力集中的界面突变处<strong>已萌生微裂纹</strong>！${hasUnderfill ? '（Underfill 下填料已大幅缩减了此应变）' : ''}`;
         } 
         else {
-            // 阶段 4: 疲劳断裂
-            jointL.style.background = '#f87171'; // 变红
+            jointL.style.background = '#f87171'; // 变红开裂
             jointR.style.background = '#f87171';
-            crackL.style.width = '90%'; // 裂纹几乎横穿
+            crackL.style.width = '90%'; // 疲劳贯穿
             crackR.style.width = '90%';
-            feedback.innerHTML = `⚠️ <strong>工程疲劳开裂警报 (Fatigue Failure):</strong> 恶劣温差使外围剪切应变突破极限！裂纹完全贯穿，导致<strong>板级电路开路失效</strong>。此时中心中性点（DNP=0）焊球依然完好，印证了最大应力局域化效应。`;
+            feedback.innerHTML = `⚠️ <strong>工程疲劳开裂警报 (Fatigue Failure):</strong> 剧烈温差使外围应变剪切突破极限！裂纹完全贯穿，导致<strong>板级开路失效</strong>。此时中心中性点焊球依然完好，印证了最大应力局域化效应。`;
         }
 
         if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
@@ -670,13 +697,13 @@
             imcText.innerHTML = `<strong>初始状态：</strong>回流焊前，焊料与铜衬垫边界分明，尚未发生高温冶金反应。`;
         } else if (hours > 0 && hours <= 150) {
             voids.forEach(v => v.style.display = 'none');
-            imcText.innerHTML = `<strong>一次回流焊阶段 (${hours}h)：</strong>铜衬垫与固/液态锡层发生界面化学反应，自发生成簇状的 <strong>$\\text{Cu}_6\\text{Sn}_5$ ($\eta$ 相)</strong>。结合稳固，厚度处于健康区间（$1\\sim2\\,\\mu\\text{m}$）。`;
+            imcText.innerHTML = `<strong>一次回流焊阶段 (${hours}h)：</strong>铜衬垫与固/液态锡层发生界面化学反应，自发生成簇状的 <strong>$\\text{Cu}_6\\text{Sn}_5$ ($\eta$ 相)</strong>。结合稳供，厚度处于健康区间（$1\\sim2\\,\\mu\\text{m}$）。`;
         } else if (hours > 150 && hours <= 600) {
             imcText.innerHTML = `<strong>固态扩散老化阶段 (${hours}h)：</strong>由于 Cu 原子跨越界面持续向锡侧扩散，在 $\\text{Cu}_6\\text{Sn}_5$ 与 Cu 衬垫之间夹层孕育出了富铜的 <strong>$\\text{Cu}_3\\text{Sn}$ ($\\varepsilon$ 相)</strong>。金属间化合物总厚度超标，硬脆性质显现。`;
             voids.forEach(v => v.style.display = 'none');
         } else {
             voids.forEach(v => v.style.display = 'block');
-            imcText.innerHTML = `<strong>极端热老化后期 (${hours}h)：</strong>因为铜原子向外扩散通量 $J_{\\text{Cu}}$ 远大于锡原子向内的扩散通量 $J_{\\text{Sn}}$，由于质量不对称净转移，在 $\\text{Cu}_3\\text{Sn}$ 与 Cu 接触面上萌生聚集了大量的 <strong>柯肯达尔空洞（Kirkendall Voids）</strong>！断裂韧性严重崩塌。`;
+            imcText.innerHTML = `<strong>极端热老化后期 (${hours}h)：</strong>因为铜原子向外扩散通量 $J_{\\text{Cu}}$ 远大于锡原子向内的扩散通量 $J_{\\text{Sn}}$，由于质量不对称净转移，在 $\\text{Cu}_3\\text{Sn}$ 与 Cu 接触面上萌生聚集了大量的 <strong>柯肯达尔空洞（Kirkendall Voids）</strong>！断裂韧性严重崩溃。`;
         }
         if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
@@ -700,7 +727,6 @@
         }
     }
 
-    // 复杂选型评定
     function evaluateDesign() {
         const val = document.getElementById('selectDesign').value;
         const box = document.getElementById('designFeedback');
@@ -709,7 +735,7 @@
             box.className = "alert-info";
             box.style.backgroundColor = "#dcfce7";
             box.style.color = "#14532d";
-            box.innerHTML = `🎉 <strong>绝佳方案！</strong>在宇航级高可靠场景中，陶瓷基板与 FR-4 的大范围 $\\Delta T$ 循环会导致严重的 CTE 剪切应力。普通 BGA 极其脆弱极易崩裂；LGA 机械接触则易受强振动干扰瞬断。采用 <strong>CGA（CCGA）</strong> 封装，高纵横比焊料柱具有优异的柔顺性，是目前不可替代的核心技术。`;
+            box.innerHTML = `🎉 <strong>绝佳方案！</strong>在宇航级高可靠场景中，陶瓷基板与 FR-4 的大范围 $\\Delta T$ 循环会导致严重的 CTE 剪切应力。普通 BGA 极其脆弱极易崩溃；LGA 机械接触则易受强振动干扰瞬断。采用 <strong>CGA（CCGA）</strong> 封装，高纵横比焊料柱具有优异的柔顺性，是目前不可替代的核心技术。`;
         } else if (val === "") {
             box.style.display = 'none';
         } else {
@@ -721,7 +747,6 @@
         if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
 
-    // 单题即点即评
     function checkAnswer(qId, userValue) {
         const card = document.getElementById(qId);
         if (card.classList.contains('locked')) return;
@@ -759,7 +784,6 @@
         if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
 
-    // 状态全局清空重置
     function resetQuiz() {
         document.getElementById('quizForm').reset();
         document.querySelectorAll('.question-card').forEach(card => card.classList.remove('locked'));
