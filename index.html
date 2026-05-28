@@ -19,20 +19,22 @@
         header h1 { margin: 0; font-size: 28px; }
         header p { margin: 10px 0 0; opacity: 0.9; font-size: 15px; }
         
-        /* 交互探索板块样式 */
         .interactive-section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
         .section-title { color: var(--primary-color); border-left: 5px solid var(--secondary-color); padding-left: 10px; font-size: 20px; margin-top: 0; margin-bottom: 20px; }
         .visual-board { display: flex; justify-content: space-around; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
         .structure-card { flex: 1; min-width: 220px; background: #f1f5f9; border: 2px solid #e2e8f0; padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; text-align: center; }
         .structure-card:hover { border-color: var(--secondary-color); background: #eff6ff; transform: translateY(-2px); }
+        .structure-card.active { border-color: var(--secondary-color); background: #eff6ff; box-shadow: 0 0 8px rgba(59,130,246,0.3); }
         .structure-icon { font-size: 24px; margin-bottom: 8px; }
         .structure-title { font-weight: bold; color: var(--primary-color); margin-bottom: 5px; }
         
         .explore-detail-box { margin-top: 15px; padding: 20px; background: #ecfdf5; border-left: 4px solid var(--success-color); border-radius: 4px; display: none; }
         .explore-flex { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
         .explore-text { flex: 3; font-size: 14px; text-align: left; }
-        .explore-img-container { flex: 2; min-width: 220px; text-align: center; background: white; padding: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .explore-img { max-width: 100%; max-height: 180px; border-radius: 4px; object-fit: contain; background-color: #f8fafc; }
+        .explore-img-container { flex: 2; min-width: 240px; text-align: center; background: white; padding: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        /* 真实工业切片图片自适应样式 */
+        .explore-img { display: none; width: 100%; height: auto; max-height: 200px; object-fit: contain; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; }
 
         /* 题库样式 */
         .quiz-section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -44,7 +46,6 @@
         .option-item { padding: 12px 15px; margin: 6px 0; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 14px; line-height: 1.4; }
         .option-item:hover { background-color: #f8fafc; border-color: #94a3b8; }
         
-        /* 锁定与答题反馈样式 */
         .question-card.locked .option-item { cursor: not-allowed; pointer-events: none; }
         .option-item.correct-choice { background-color: #dcfce7 !important; border-color: var(--success-color) !important; color: #14532d; font-weight: 600; }
         .option-item.wrong-choice { background-color: #fee2e2 !important; border-color: var(--error-color) !important; color: #7f1d1d; }
@@ -66,24 +67,24 @@
 <div class="container">
     <header>
         <h1>9.3 阵列封装 互动学习控制台</h1>
-        <p>本书配套微电子封装技术交互式习题库 —— 选项即点即评 ➕ 结构显微图文探索</p>
+        <p>本书配套微电子封装技术交互式习题库 —— 选项即点即评 ➕ 真实学术截面探索</p>
     </header>
 
     <div class="interactive-section">
         <h3 class="section-title">💡 阵列互连结构 显微镜探索</h3>
         <p style="font-size: 14px; color: #64748b; margin-top:-10px;">点击下方不同的封装互连端子形态，探索其高清晰显微结构、工程定位与失效风险：</p>
         <div class="visual-board">
-            <div class="structure-card" onclick="explore('bga')">
+            <div id="card-bga" class="structure-card" onclick="explore('bga')">
                 <div class="structure-icon">🔮</div>
                 <div class="structure-title">BGA (球栅阵列)</div>
                 <div class="structure-desc" style="font-size:12px; color:#64748b;">焊料球互连</div>
             </div>
-            <div class="structure-card" onclick="explore('cga')">
+            <div id="card-cga" class="structure-card" onclick="explore('cga')">
                 <div class="structure-icon">💈</div>
                 <div class="structure-title">CGA (圆柱阵列)</div>
                 <div class="structure-desc" style="font-size:12px; color:#64748b;">焊料柱互连</div>
             </div>
-            <div class="structure-card" onclick="explore('lga')">
+            <div id="card-lga" class="structure-card" onclick="explore('lga')">
                 <div class="structure-icon">🔲</div>
                 <div class="structure-title">LGA (触点阵列)</div>
                 <div class="structure-desc" style="font-size:12px; color:#64748b;">平面触点金属衬垫</div>
@@ -94,8 +95,12 @@
             <div class="explore-flex">
                 <div id="exploreText" class="explore-text"></div>
                 <div class="explore-img-container">
-                    <div style="font-size: 11px; color:#94a3b8; margin-bottom:6px;">🔍 显微解剖/原理物理结构</div>
-                    <img id="exploreImg" class="explore-img" src="" alt="封装结构图">
+                    <div style="font-size: 11px; color:#94a3b8; margin-bottom:6px;">🔬 工业学术真实截面图</div>
+                    
+                    <img id="img-bga" class="explore-img" src="" alt="BGA 真实显微截面图">
+                    <img id="img-cga" class="explore-img" src="" alt="CGA 真实显微截面图">
+                    <img id="img-lga" class="explore-img" src="" alt="LGA 真实压接 Socket 结构图">
+
                 </div>
             </div>
         </div>
@@ -103,7 +108,6 @@
 
     <div class="quiz-section">
         <h3 class="section-title">📝 随堂核心概念通关测试（点击选项即刻评测）</h3>
-
         <form id="quizForm">
             <div class="question-card" id="q1" data-answer="B">
                 <div class="question-title">Q1. 当器件引脚数超过 200 个时，传统的四边外围引线封装（如 QFP）装配时面临的最主要几何限制及失效风险是？</div>
@@ -192,123 +196,73 @@
                 </ul>
                 <div class="feedback"></div>
             </div>
-        </form>
 
+        </form>
         <button type="button" onclick="resetQuiz()">清空所有答题纪录</button>
     </div>
 </div>
 
 <script>
-    // 使用精准内联Base64矢量与原理示意图，确保国内离线及在线环境100%成功加载且完全正确
-    const exploreData = {
+    const textData = {
         bga: {
             title: "🔮 BGA (球栅阵列) 结构与显微特征：",
-            desc: "<strong>核心机制：</strong>底部由二维阵列焊料球（球径通常在 0.5-0.76mm）提供电互连与热路径。<br><strong>工程优势：</strong>引脚总数与面积成正比。回流焊时熔融焊料的表面张力可带来优异的<strong>自对准效应</strong>。<br><strong>可靠性痛点：</strong>对于大尺寸器件（如 >40×40mm），由于基板与PCB热膨胀系数（CTE）不匹配，在温度循环下焊料球会承受巨大的疲劳剪切应力，边缘焊点易率先开裂。",
-            img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120' width='100%' height='100%Custom'><rect width='200' height='120' fill='%23f1f5f9'/><rect x='20' y='20' width='160' height='15' fill='%233b82f6' rx='3'/><text x='100' y='30' fill='white' font-size='9' font-weight='bold' text-anchor='middle'>硅芯片/封装基板 (Substrate)</text><rect x='20' y='85' width='160' height='15' fill='%2364748b' rx='3'/><text x='100' y='95' fill='white' font-size='9' font-weight='bold' text-anchor='middle'>印刷电路板 (PCB 主板)</text><circle cx='45' cy='55' r='12' fill='%23cbd5e1' stroke='%23475569' stroke-width='1.5'/><circle cx='100' cy='55' r='12' fill='%23cbd5e1' stroke='%23475569' stroke-width='1.5'/><circle cx='155' cy='55' r='12' fill='%23cbd5e1' stroke='%23475569' stroke-width='1.5'/><path d='M 35 43 L 55 43 M 33 67 L 57 67' stroke='%23ef4444' stroke-width='1.5' stroke-dasharray='2,2'/><text x='100' y='72' fill='%231e3a8a' font-size='8' text-anchor='middle'>二维阵列焊料球 (Solder Ball)</text></svg>"
+            desc: "<strong>核心机制：</strong>底部由二维阵列焊料球提供电互连与热路径。<br><strong>工程优势：</strong>引脚总数与面积成正比。回流焊时熔融焊料的表面张力可带来优异的<strong>自对准效应</strong>。<br><strong>可靠性痛点：</strong>由于基板与PCB热膨胀系数（CTE）不匹配，在温度循环下焊料球会承受巨大的疲劳剪切应力，边缘焊点易率先开裂。"
         },
         cga: {
             title: "💈 CGA (圆柱阵列) 结构与显微特征：",
-            desc: "<strong>核心机制：</strong>由于大尺寸多层陶瓷基板与普通玻璃纤维 PCB 的 CTE 差异极大，BGA 焊球在极端环境极易被生生剪断。CGA 采用<strong>高纵横比的焊料柱</strong>代替焊料球。<br><strong>工程优势：</strong>高细长的柱状结构具有极高的<strong>机械柔顺性</strong>，能通过自身微小的弯曲形变极大释放剪切应力，特别耐温度循环。<br><strong>可靠性痛点：</strong>广泛应用于航天、卫星、高端军工领域。其工艺窗口较窄，柱子根部常出现因应力集中而萌生裂纹的现象。",
-            img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120' width='100%' height='100%Custom'><rect width='200' height='120' fill='%23f1f5f9'/><rect x='20' y='15' width='160' height='15' fill='%231e3a8a' rx='3'/><text x='100' y='25' fill='white' font-size='9' font-weight='bold' text-anchor='middle'>陶瓷基板 (Ceramic Substrate)</text><rect x='20' y='90' width='160' height='15' fill='%2364748b' rx='3'/><text x='100' y='100' fill='white' font-size='9' font-weight='bold' text-anchor='middle'>PCB 主板</text><rect x='40' y='30' width='12' height='60' fill='%2394a3b8' stroke='%23475569'/><rect x='94' y='30' width='12' height='60' fill='%2394a3b8' stroke='%23475569'/><rect x='148' y='30' width='12' height='60' fill='%2394a3b8' stroke='%23475569'/><path d='M 40 60 Q 36 60 40 90 M 94 60 Q 90 60 94 90 M 148 60 Q 144 60 148 90' fill='none' stroke='%233b82f6' stroke-width='1' stroke-dasharray='2,2'/><text x='112' y='63' fill='%231e293b' font-size='8'>高柔顺性焊料柱</text></svg>"
+            desc: "<strong>核心机制：</strong>由于大尺寸多层陶瓷基板与普通玻璃纤维 PCB 的 CTE 差异极大，BGA 焊球在极端环境极易被生生剪断。CGA 采用<strong>高纵横比的焊料柱</strong>代替焊料球。<br><strong>工程优势：</strong>高细长的柱状结构具有极高的<strong>机械柔顺性</strong>，能通过自身微小的弯曲形变极大释放剪切应力，特别耐温度循环。<br><strong>可靠性痛点：</strong>广泛应用于航天、卫星、高端军工领域。其工艺窗口较窄，柱子根部常出现因应力集中而萌生裂纹的现象。"
         },
         lga: {
             title: "🔲 LGA (触点阵列) 结构与显微特征：",
-            desc: "<strong>核心机制：</strong>封装底部不预制焊球，而是制作一层扁平的金属点阵（Pad）。它不焊死在PCB上，需要配合高精度的<strong>连接器/插座（Socket）</strong>利用机械压力紧压接触。<br><strong>工程优势：</strong>① 整体安装高度显著降低；② 信号路径极短，阻抗极低，电学高速完整性极佳；③ <strong>维护极其便捷</strong>，CPU 升级或烧毁时可直接从 Socket 里更换，无需回流焊拆卸。<br><strong>可靠性痛点：</strong>依靠接触触点机械压接，长期使用存在弹簧弹力退化、接触电阻因氧化而增大，或因振动导致瞬断的隐患。",
-            img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120' width='100%' height='100%Custom'><rect width='200' height='120' fill='%23f1f5f9'/><rect x='20' y='15' width='160' height='15' fill='%233b82f6' rx='3'/><text x='100' y='25' fill='white' font-size='9' font-weight='bold' text-anchor='middle'>LGA 器件 (CPU)</text><rect x='20' y='90' width='160' height='15' fill='%2364748b' rx='3'/><text x='100' y='100' fill='white' font-size='9' font-weight='bold' text-anchor='middle'>PCB 主板</text><rect x='25' y='45' width='150' height='35' fill='none' stroke='%2310b981' stroke-width='1.5' stroke-dasharray='3,3'/><text x='100' y='40' fill='%2310b981' font-size='8' text-anchor='middle'>机械压接插座 (Socket)</text><path d='M 40 30 L 45 65 L 55 90 M 95 30 L 100 65 L 110 90 M 150 30 L 155 65 L 165 90' fill='none' stroke='%23f59e0b' stroke-width='2'/><circle cx='40' cy='30' r='2' fill='%23ef4444'/><circle cx='95' cy='30' r='2' fill='%23ef4444'/><circle cx='150' cy='30' r='2' fill='%23ef4444'/><text x='60' y='68' fill='%23d97706' font-size='8'>金手指金属平面触点</text></svg>"
+            desc: "<strong>核心机制：</strong>封装底部不预制焊球，而是制作一层扁平的金属点阵。它不焊死在PCB上，需要配合高精度的<strong>连接器/插座（Socket）</strong>利用机械压力紧压接触。<br><strong>工程优势：</strong>① 整体安装高度显着降低；② 信号路径极短，电学高速完整性极佳；③ <strong>维护极其便捷</strong>，CPU 升级或烧毁时可直接从 Socket 里更换。<br><strong>可靠性痛点：</strong>依靠接触触点机械压接，长期使用存在弹簧弹力退化、接触电阻因氧化而增大，或因振动导致瞬断的隐患。"
         }
     };
 
-    // 所有选项的逐项针对性解析数据库
     const explanations = {
-        q1: {
-            A: "❌ A错：引线框架断裂多见于传统 SOP/DIP 封装的弯折处，非 QFP 限制引脚数超 200 的主要瓶颈。",
-            B: "🎉 B对：周边引线封装的引脚只能排在四周，数量多必然导致引脚间距（Pitch）缩减至制造极限，板级焊接时焊膏稍有溢出即导致两脚相连短路（桥连）。",
-            C: "❌ C错：引线过长确实会增大引线电感带来电学噪声，但并非最致命的、限制引脚密度的“几何制造限制”。",
-            D: "❌ D错：“爆米花”效应属于塑料封装材料吸湿后的共性可靠性隐患，与周边引脚数是否超过 200 无必然几何因果关系。"
-        },
-        q2: {
-            A: "🎉 A对：在回流焊的高温区，焊料熔化为液态。由于其表面张力倾向于使液态表面积最小化（趋于完美球形），这股凝聚力会自发将贴片轻微歪斜的芯片拉回至焊盘中心，即“自对准效应”。",
-            B: "❌ B错：下填料（Underfill）点胶工序是在芯片贴装于 PCB 回流焊彻底完成后才进行的，不能帮助回流焊过程对准。",
-            C: "❌ C错：重力电磁场匹配是完全虚构的伪技术词汇。",
-            D: "❌ D错：助焊剂气流通常会导致元件产生不规律漂移或飞溅（如气孔），而非良性的高精度对准力。"
-        },
-        q3: {
-            A: "❌ A错：焊料柱与焊料球的材质基本相近（如 Sn-Pb 或无铅配方），电学电阻率没有本质数量级差异。",
-            B: "❌ B错：由于焊料柱细长且密集排列在底部，CGA 的目检和手工作业难度甚至明显高于 BGA，通常必须依赖 X-Ray 射线检测。",
-            C: "🎉 C对：高纵横比（细长）的焊料柱具备极佳的柔顺性。当陶瓷基板和玻璃纤维板（PCB）因 CTE 错配产生不对称的热胀冷缩时，细长柱能通过自身微小的弹性/塑性弯曲来缓冲吸收剪切应力，防止焊点根部生生被剪断。",
-            D: "❌ D错：焊料柱通常也是由钎料合金（例如高铅焊料）构成或内部含铜核，在长期热交变载荷下依旧存在热疲劳损伤，只是寿命大幅延长。"
-        },
-        q4: {
-            A: "❌ A错：LGA 表面是完全平面的金属衬垫（Pad），没有任何外露引脚，无法直接插入面包板。",
-            B: "❌ B错：LGA 最大的优势就是通过 Socket 压接实现“非永久连接”，从而不需要进行硬钎焊熔接工艺。",
-            C: "❌ C错：高端 CPU 功耗极高，LGA 封装设计中必须极其严苛地考虑中心区域热量扇出（如配置热导通孔或金属盖）。",
-            D: "🎉 D对：LGA 底部为平面触点。通过主板上的弹性插座（Socket）机械压紧闭合，它去掉了焊球高度，因此安装高度更低、高频电学寄生效应更小，且更换、升级 CPU 极度丝滑便捷。"
-        },
-        q5: {
-            A: "❌ A错：下填料流体一旦固化会形成坚硬的横向保护层，无法在此状态下进行大规模置球与冶金回流焊互连。",
-            B: "🎉 B对：正确的工业顺序是：首先在封装基板上喷涂助焊剂，通过机械吸嘴置球、过一次回流焊让焊球固定在封装基板上（制成 BGA 器件）；随后将器件贴装到 PCB 上二次回流焊接；最后通过毛细管作用（Capillary Underfill）在其缝隙中点入环氧树脂下填料胶水并加热固化。",
-            C: "❌ C错：置球是 BGA 器件出厂前在封装厂就完成的工序，而非最后的板级质检工序。",
-            D: "❌ D错：近共晶焊料必须经历高温回流焊阶段，以建立界面真正的冶金结合（形成 IMC 层），单纯依靠胶水粘性无法保证长期的电气导通。"
-        },
-        q6: {
-            A: "🎉 A对（选错误项）：IMC（金属间化合物，如 Cu6Sn5）本质上是非常**硬且脆**的金属间化合物。它的作用是建立冶金结合，但其脆性极大、容易产生应力集中。过厚时在受到外部机械冲击时最易成为裂纹萌生源，因此绝对不是“缓冲冲击的柔性层”。",
-            B: "❌ B错（陈述正确）：回流焊和老化过程中，紧靠铜基底的是富铜的 ε 相 (Cu3Sn)，而靠焊料侧的则是 η 相 (Cu6Sn5)，这是经典的界面层析结构。",
-            C: "❌ C错（陈述正确）：IMC 厚度通常需要严格控制在几微米以内。过厚意味着脆性增加并伴随高本征内应力，极易发生界面脆性剥离失效。",
-            D: "❌ D错（陈述正确）：在服役和长期高温老化环境中，固态原子会在驱动力下跨界面持续发生扩散，导致 IMC 层的厚度表现为时间平方根的增长规律。"
-        },
-        q7: {
-            A: "❌ A错：树枝状晶体偏析（枝晶）通常是在焊料由液态向固态结晶冷却过程中，因成分过冷产生的显微晶体形貌，与热老化固态互扩散无关。",
-            B: "❌ B错：无铅焊料中已经基本废除 Pb（铅）元素；且该空洞现象是由 Cu-Sn 互扩散速率差引起的，与 Pb 无关。",
-            C: "🎉 C对：由于铜原子向锡侧扩散的扩散通量（Flux）远大于锡原子向铜侧扩散的通量，在界面发生了质量的不对称净转移，这会在铜衬垫一侧的 Cu3Sn 界面层内遗留微观格子空位，聚集后形成线性的微小孔洞，工业和物理学上定义为**柯肯达尔空洞**，严重恶化焊点抗冲击强度。",
-            D: "❌ D错：应力诱发晶格位错位移属于金属塑性变形和位错滑移范畴，不是这种由扩散不对称形成的物理空洞缺陷。"
-        },
-        q8: {
-            A: "❌ A错：塑封胶吸水导致的爆米花效应属于瞬间高温（如再次过回流焊）时发生的失效，不属于长期温变循环下的热疲劳开裂基理。",
-            B: "❌ B错：阵列封装底部焊点通常是 Sn 基焊料与 Cu 衬垫，不涉及金引线（Wire），且底层主驱动力是机械应力而非电化学腐蚀。",
-            C: "❌ C错：常见无铅焊料（如 SAC305）在 -40℃ 到 125℃ 的常规车规级/军工级热循环中不涉及破坏性的晶格大相变。",
-            D: "🎉 D对：由于硅芯片（~2.6 ppm/℃）、封装基板（如陶瓷 ~6 ppm/℃ 或有机物 ~15 ppm/℃）以及 PCB 主板（~17 ppm/℃）的**热膨胀系数（CTE）严重不匹配**，在温度循环起伏时，各层材料的膨胀/收缩尺寸不对称，夹在中间的阵列焊点承受周期性的拉-压和剪切交变变形，最终导致萌生热疲劳裂纹并发生断裂失效。"
-        }
+        q1: { A: "❌ A错：引线框架断裂多见于传统 SOP/DIP 封装的弯折处。", B: "🎉 B对：数量多必然导致引脚间距逼近制造极限，板级焊接时极易短路（桥连）。", C: "❌ C错：引线过长会增大引线电感，但非几何制造限制。", D: "❌ D错：“爆米花”效应属于吸湿后的共性失效。" },
+        q2: { A: "🎉 A对：熔融焊料的表面张力倾向于使液态表面积最小化，从而将歪斜的芯片拉回至焊盘中心。", B: "❌ B错：下填料工艺在回流焊彻底完成后进行。", C: "❌ C错：完全虚构的词汇。", D: "❌ D错：助焊剂气流通常会导致元件产生偏移而非对准。" },
+        q3: { A: "❌ A错：材质基本相近，电阻率没有本质差异。", B: "❌ B错：CGA 目检和手工作业难度极高，必须依赖 X-Ray 检测。", C: "🎉 C对：高纵横比（细长）的焊料柱具备极佳的柔顺性，能通过自身微小弯曲变形缓冲吸收剪切应力。", D: "❌ D错：长期热交变载荷下依旧存在热疲劳损伤，只是寿命大幅延长。" },
+        q4: { A: "❌ A错：LGA 表面是完全平面的金属衬垫，无法插入面包板。", B: "❌ B错：LGA 最大的优势就是通过 Socket 压接实现“非永久连接”。", C: "❌ C错：高端 CPU 功耗极高，必须极其严苛地考虑热量扇出。", D: "🎉 D对：配合弹性插座（Socket）机械压紧，去掉了焊球高度，更换维护方便且高频电学寄生效应小。" },
+        q5: { A: "❌ A错：下填料流体一旦固化无法在此状态下进行置球与冶金回流焊。", B: "🎉 B对：工业顺序：基板喷涂助焊剂 → 精确置球 → 一次回流焊制成BGA器件 → 贴装到PCB上二次回流焊接 → 进行毛细管下填料充填并加热固化。", C: "❌ C错：置球是 BGA 器件出厂前在封装厂就完成的工序。", D: "❌ D错：必须经历高温回流焊阶段建立真正的冶金结合（IMC层）。" },
+        q6: { A: "🎉 A对（选错误项）：IMC 本质上是非常硬且脆的金属间化合物。过厚时在受到外部机械冲击时最易成为裂纹萌生源，绝对不是缓冲柔性层。", B: "❌ B错（陈述正确）：靠近铜基底的是 ε 相 (Cu3Sn)，靠焊料侧的是 η 相 (Cu6Sn5)。", C: "❌ C错（陈述正确）：过厚意味着脆性增加并伴随高本征内应力。", D: "❌ D错（陈述正确）：在服役和长期高温老化中，厚度表现为时间平方根的增长规律。" },
+        q7: { A: "❌ A错：树枝状晶体偏析是在焊料由液态向固态结晶冷却过程中产生的。", B: "❌ B错：该缺陷与 Pb 无关。", C: "🎉 C对：由于 Cu 原子向锡侧扩散速率远大于 Sn 向铜侧的速率，引发质量不对称净转移，在 Cu3Sn 界面层内遗留微观空位，聚集后形成柯肯达尔空洞。", D: "❌ D错：不属于位错滑移范畴。" },
+        q8: { A: "❌ A错：爆米花效应属于瞬间高温（如再次过回流焊）时发生的失效。", B: "❌ B错：底层主驱动力是机械应力而非电化学腐蚀。", C: "❌ C错：常规温变循环内不涉及破坏性的晶格大相变。", B: "❌ B错：底线驱动力非电化学。", D: "🎉 D对：由于硅芯片、封装基板以及 PCB 主板之间的热膨胀系数（CTE）严重不匹配，温变下产生周期性剪切应变导致热疲劳裂纹。" }
     };
 
-    // 显微镜探索交互函数
     function explore(type) {
         const box = document.getElementById('exploreDetailBox');
-        const textBox = document.getElementById('exploreText');
-        const imgBox = document.getElementById('exploreImg');
-        
         box.style.display = 'block';
-        textBox.innerHTML = `<strong>${exploreData[type].title}</strong><br>${exploreData[type].desc}`;
-        imgBox.src = exploreData[type].img;
+
+        document.querySelectorAll('.structure-card').forEach(c => c.classList.remove('active'));
+        document.getElementById(`card-${type}`).classList.add('active');
+
+        const textBox = document.getElementById('exploreText');
+        textBox.innerHTML = `<strong>${textData[type].title}</strong><br>${textData[type].desc}`;
+        
+        // 控制真实图片的显示与隐藏
+        document.querySelectorAll('.explore-img').forEach(img => img.style.display = 'none');
+        document.getElementById(`img-${type}`).style.display = 'block';
         
         box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    // 点击选项即刻检查函数（单题模式）
     function checkAnswer(qId, userValue) {
         const card = document.getElementById(qId);
-        // 如果这道题已经选过，则锁定不作反应
         if (card.classList.contains('locked')) return;
 
         const correctAnswer = card.getAttribute('data-answer');
         const options = card.querySelectorAll('.option-item');
         const feedbackBox = card.querySelector('.feedback');
         
-        // 锁定该题
         card.classList.add('locked');
         feedbackBox.style.display = 'block';
 
-        // 标记对错颜色
         options.forEach(opt => {
             const optVal = opt.getAttribute('data-value');
-            if (optVal === correctAnswer) {
-                opt.classList.add('correct-choice'); // 正确选项变绿
-            }
-            if (optVal === userValue && userValue !== correctAnswer) {
-                opt.classList.add('wrong-choice'); // 如果选错，选错的变红
-            }
+            if (optVal === correctAnswer) opt.classList.add('correct-choice');
+            if (optVal === userValue && userValue !== correctAnswer) opt.classList.add('wrong-choice');
         });
 
-        // 输出即时对错大标题
         if (userValue === correctAnswer) {
             feedbackBox.className = 'feedback correct';
             feedbackBox.innerHTML = `<div class="feedback-title">🎉 回答正确！</div>`;
@@ -317,33 +271,25 @@
             feedbackBox.innerHTML = `<div class="feedback-title">❌ 回答错误。你选择了 ${userValue}，正确答案是 ${correctAnswer}。</div>`;
         }
 
-        // 渲染“无论对错，每个选项都有解析”的互动列表
-        let explanationHtml = `<div style="font-weight:600; margin-top:8px; color:#1e293b;">💡 各选项逐项透彻解析：</div>`;
-        explanationHtml += `<ul class="option-explanation-list">`;
-        
+        let explanationHtml = `<div style="font-weight:600; margin-top:8px; color:#1e293b;">💡 各选项逐项透彻解析：</div><ul class="option-explanation-list">`;
         const qExplanations = explanations[qId];
         for (let key in qExplanations) {
-            let style = "";
-            if (key === correctAnswer) style = "style='color:#166534; font-weight:600;'"; // 正确答案选项在解析里加粗加绿
+            let style = (key === correctAnswer) ? "style='color:#166534; font-weight:600;'" : "";
             explanationHtml += `<li ${style}>${qExplanations[key]}</li>`;
         }
         explanationHtml += `</ul>`;
-        
         feedbackBox.innerHTML += explanationHtml;
     }
 
-    // 重置
     function resetQuiz() {
         document.getElementById('quizForm').reset();
         document.querySelectorAll('.question-card').forEach(card => card.classList.remove('locked'));
-        document.querySelectorAll('.option-item').forEach(item => {
-            item.className = 'option-item';
-        });
+        document.querySelectorAll('.option-item').forEach(item => item.className = 'option-item');
         document.querySelectorAll('.feedback').forEach(f => f.style.display = 'none');
         document.getElementById('exploreDetailBox').style.display = 'none';
+        document.querySelectorAll('.structure-card').forEach(c => c.classList.remove('active'));
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
-
 </body>
 </html>
