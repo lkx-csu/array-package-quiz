@@ -3,68 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9.3 阵列封装 交互式习题库</title>
+    <title>9.3 阵列封装 交互式互动学习库</title>
     <style>
-        body { font-family: 'PingFang SC', sans-serif; background-color: #f5f7fa; padding: 20px; color: #333; }
-        .quiz-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h2 { color: #1e3a8a; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
-        .question { margin-bottom: 25px; }
-        .options-list { list-style: none; padding: 0; }
-        .option-item { padding: 12px; margin: 8px 0; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-        .option-item:hover { background-color: #f0fdf4; border-color: #10b981; }
-        .selected { background-color: #eff6ff; border-color: #3b82f6; font-weight: bold; }
-        button { background-color: #1e3a8a; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; }
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f8fafc;
+            --text-color: #334155;
+        }
+        body { font-family: 'Helvetica Neue', Arial, 'PingFang SC', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        header h1 { margin: 0; font-size: 28px; }
+        header p { margin: 10px 0 0; opacity: 0.9; font-size: 15px; }
+        
+        /* 交互探索板块样式 */
+        .interactive-section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .section-title { color: var(--primary-color); border-left: 5px solid var(--secondary-color); padding-left: 10px; font-size: 20px; margin-top: 0; margin-bottom: 20px; }
+        .visual-board { display: flex; justify-content: space-around; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
+        .structure-card { flex: 1; min-width: 220px; background: #f1f5f9; border: 2px solid #e2e8f0; padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; text-align: center; }
+        .structure-card:hover { border-color: var(--secondary-color); background: #eff6ff; transform: translateY(-2px); }
+        .structure-icon { font-size: 24px; margin-bottom: 8px; }
+        .structure-title { font-weight: bold; color: var(--primary-color); margin-bottom: 5px; }
+        .explore-detail { margin-top: 15px; padding: 15px; background: #ecfdf5; border-left: 4px solid var(--success-color); border-radius: 4px; display: none; font-size: 14px; text-align: left; }
+
+        /* 题库样式 */
+        .quiz-section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .question-card { border-bottom: 1px dashed #e2e8f0; padding-bottom: 20px; margin-bottom: 25px; }
+        .question-card:last-child { border-bottom: none; }
+        .question-title { font-weight: 600; font-size: 16px; margin-bottom: 12px; color: #1e293b; }
+        .options-list { list-style: none; padding: 0; margin: 0; }
+        .option-item { padding: 12px 15px; margin: 6px 0; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 14px; display: flex; align-items: center; }
+        .option-item:hover { background-color: #f8fafc; border-color: #94a3b8; }
+        .option-item.selected { background-color: #eff6ff; border-color: var(--secondary-color); font-weight: 600; }
+        
+        .action-container { margin-top: 20px; display: flex; gap: 15px; }
+        button { flex: 1; background-color: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.2s; }
         button:hover { background-color: #172554; }
-        .result { margin-top: 20px; padding: 15px; border-radius: 6px; display: none; line-height: 1.6; }
-        .correct { background-color: #dcfce7; color: #14532d; border: 1px solid #bbf7d0; }
-        .wrong { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fecaca; }
+        #resetBtn { background-color: #64748b; }
+        #resetBtn:hover { background-color: #475569; }
+
+        .feedback { margin-top: 12px; padding: 12px 15px; border-radius: 6px; font-size: 14px; display: none; line-height: 1.5; }
+        .feedback.correct { background-color: #dcfce7; color: #14532d; border: 1px solid #bbf7d0; }
+        .feedback.wrong { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fecaca; }
+        .score-banner { display: none; background: #f0fdf4; border: 2px solid #bbf7d0; color: #166534; padding: 20px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<div class="quiz-container">
-    <h2>9.3 阵列封装 随堂练习</h2>
-    
-    <div class="question" id="q1">
-        <p><strong>Q1: 为什么当器件引脚数超过 200 个时，传统的四边外围引线封装（如 QFP）装配时容易发生短路？</strong></p>
-        <ul class="options-list">
-            <li class="option-item" onclick="selectOption(this, 'A')">A. 芯片内部发热量过大导致焊点熔化</li>
-            <li class="option-item" onclick="selectOption(this, 'B')">B. 外围引脚节距（Pitch）逼近制造极限，极易发生焊膏桥连</li>
-            <li class="option-item" onclick="selectOption(this, 'C')">C. 二维引脚阵列互连限制了信号传输速度</li>
-            <li class="option-item" onclick="selectOption(this, 'D')">D. 封装底部的二维互连端子产生了寄生电感</li>
-        </ul>
+<div class="container">
+    <header>
+        <h1>9.3 阵列封装 互动学习控制台</h1>
+        <p>本书配套微电子封装技术交互式习题库 —— 基于二维面阵列互连、工艺流程及板级可靠性失效分析</p>
+    </header>
+
+    <div class="interactive-section">
+        <h3 class="section-title">💡 阵列互连结构 显微镜探索</h3>
+        <p style="font-size: 14px; color: #64748b; margin-top:-10px;">点击下方不同的封装互连端子形态，探索其在工程中的独特定位与失效风险：</p>
+        <div class="visual-board">
+            <div class="structure-card" onclick="explore('bga')">
+                <div class="structure-icon">🔮</div>
+                <div class="structure-title">BGA (球栅阵列)</div>
+                <div class="structure-desc" style="font-size:12px; color:#64748b;">焊料球互连</div>
+            </div>
+            <div class="structure-card" onclick="explore('cga')">
+                <div class="structure-icon">💈</div>
+                <div class="structure-title">CGA (圆柱阵列)</div>
+                <div class="structure-desc" style="font-size:12px; color:#64748b;">焊料柱互连</div>
+            </div>
+            <div class="structure-card" onclick="explore('lga')">
+                <div class="structure-icon">🔲</div>
+                <div class="structure-title">LGA (触点阵列)</div>
+                <div class="structure-desc" style="font-size:12px; color:#64748b;">平面触点金属衬垫</div>
+            </div>
+        </div>
+        <div id="exploreDetail" class="explore-detail"></div>
     </div>
 
-    <button onclick="checkAnswer()">提交答案</button>
+    <div class="quiz-section">
+        <h3 class="section-title">📝 随堂核心概念通关测试</h3>
+        <div id="scoreBanner" class="score-banner"></div>
 
-    <div id="resultBox" class="result"></div>
+        <form id="quizForm">
+            <div class="question-card" data-qindex="1" data-answer="B">
+                <div class="question-title">Q1. 当器件引脚数超过 200 个时，传统的四边外围引线封装（如 QFP）装配时面临的最主要几何限制及失效风险是？</div>
+                <ul class="options-list">
+                    <li class="option-item" data-value="A">A. 封装体内引线框架热膨胀系数不匹配导致断裂</li>
+                    <li class="option-item" data-value="B">B. 外围引脚节距（Pitch）逼近工艺极限，板级装配时极易发生焊膏桥连短路</li>
+                    <li class="option-item" data-value="C">C. 周边引线过长，导致严重的声学噪声耦合</li>
+                    <li class="option-item" data-value="D">D. 二维边缘引脚极易吸潮导致塑封体发生“爆米花”效应</li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question-card" data-qindex="2" data-answer="A">
+                <div class="question-title">Q2. BGA 封装回流焊过程中，共晶/近共晶焊料球能够自动修正芯片放置偏差、提升对准精度的物理机理是？</div>
+                <ul class="options-list">
+                    <li class="option-item" data-value="A">A. 熔融焊料的表面张力产生“自对准效应（Self-alignment Effect）”</li>
+                    <li class="option-item" data-value="B">B. 下填料（Underfill）固化时的毛细管虹吸作用</li>
+                    <li class="option-item" data-value="C">C. 基板与 PCB 之间的重力电磁场匹配</li>
+                    <li class="option-item" data-value="D">D. 助焊剂高温挥发释放的水平气流反冲</li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question-card" data-qindex="3" data-answer="C">
+                <div class="question-title">Q3. 针对大尺寸、高功耗以及军工航天等高可靠性要求的高端芯片，CGA（圆柱阵列）相比 BGA 更具优势的核心原因在于？</div>
+                <ul class="options-list">
+                    <li class="option-item" data-value="A">A. 焊料柱的电阻率远低于焊料球</li>
+                    <li class="option-item" data-value="B">B. 焊料柱更容易进行手工作业和目检</li>
+                    <li class="option-item" data-value="C">C. 高纵横比的焊料柱具备更高的柔顺性，能有效释放由 CTE 错配引起的大剪切应力</li>
+                    <li class="option-item" data-value="D">D. 焊料柱完全由纯铜制成，不会产生任何热疲劳损伤</li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question-card" data-qindex="4" data-answer="D">
+                <div class="question-title">Q4. LGA（触点阵列封装）最显著的结构特征及其在微处理器（如电脑CPU）中广泛应用的原因是？</div>
+                <ul class="options-list">
+                    <li class="option-item" data-value="A">A. 底部具有极长的外露引脚，方便插入面包板</li>
+                    <li class="option-item" data-value="B">B. 必须采用硬钎焊工艺与主板永久熔接</li>
+                    <li class="option-item" data-value="C">C. 不需要考虑任何热量扇出路径</li>
+                    <li class="option-item" data-value="D">D. 表面为平面阵列触点，通过专用插座（Socket）连接，安装高度低且更换维护方便</li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question-card" data-qindex="5" data-answer="B">
+                <div class="question-title">Q5. 在典型的 BGA 封装工艺流程中，关于置球、回流焊与点胶下填料（Underfill）的时序关系，叙述正确的是？</div>
+                <ul class="options-list">
+                    <li class="option-item" data-value="A">A. 先进行下填料点胶固化，然后通过激光在胶层打孔进行置球</li>
+                    <li class="option-item" data-value="B">B. 基板上喷涂助焊剂并精确置球，通过回流焊接形成固定焊点后，再在芯片贴装于PCB后进行毛细管下填料充填</li>
+                    <li class="option-item" data-value="C">C. 置球与回流焊是在 PCB 板级装配全部完成后，作为最后一道质检工序进行的</li>
+                    <li class="option-item" data-value="D">D. 近共晶焊料本身不需要经历回流焊，直接依靠下填料的粘性固定在衬垫上</li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question-card" data-qindex="6" data-answer="A">
+                <div class="question-title">Q6. 在 Sn-Pb 或无铅焊料与铜衬垫的界面处，回流焊会不可避免地生成金属间化合物（IMC）。关于 IMC 的性质，以下描述错误的是？</div>
+                <ul class="options-list">
+                    <li class="option-item" data-value="A">A. IMC 具有极高的延展性和韧性，是缓冲封装外部机械冲击的核心柔性层</li>
+                    <li class="option-item" data-value="B">B. 常见的常温生成物主要包括 Cu6Sn5（η相）和紧靠 Cu 衬垫基底的 Cu3Sn（ε相）</li>
+                    <li class="option-item" data-value="C">C. IMC 本质上呈现硬脆性，过厚的 IMC 往往伴随高的本征应力，是焊点发生脆性断裂的隐患点</li>
+                    <li class="option-item" data-value="D">D. 在长期的热老化环境中，IMC 会持续由于固态扩散而变厚</li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question-card" data-qindex="7" data-answer="C">
+                <div class="question-title">Q7. 文档中提到，在界面化学反应和长期热老化进程中，由于 Cu 原子向 Sn 中扩散的通量大于 Sn 向 Cu 扩散的通量，在 Cu3Sn 与 Cu 衬垫界面极易萌生什么缺陷，导致界面强度急剧退化？</div>
+                <ul class="options-list">
+                    <li class="option-item" data-value="A">A. 树枝状晶体偏析（Dendrites）</li>
+                    <li class="option-item" data-value="B">B. 富Pb（铅）相严重聚集</li>
+                    <li class="option-item" data-value="C">C. 柯肯达尔空洞（Kirkendall Voids）</li>
+                    <li class="option-item" data-value="D">D. 应力诱发晶格位错位移</li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question-card" data-qindex="8" data-answer="D">
+                <div class="question-title">Q8. 在热循环（Temperature Cycling）载荷作用下，阵列封装焊点萌生热疲劳开裂的最底层物理驱动力是？</div>
+                <ul class="options-list">
+                    <li class="option-item" data-value="A">A. 塑封胶在高温下吸水发生水解膨胀</li>
+                    <li class="option-item" data-value="B">B. 铜衬垫与金引线发生电化学电位差腐蚀</li>
+                    <li class="option-item" data-value="C">C. 焊料在低温下发生由面心立方向体心立方的相变</li>
+                    <li class="option-item" data-value="D">D. 芯片、封装基板与 PCB 之间存在热膨胀系数（CTE）错配，在温变下产生周期性剪切应变</li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+        </form>
+
+        <div class="action-container">
+            <button type="button" onclick="submitQuiz()">提交整套习题</button>
+            <button type="button" id="resetBtn" onclick="resetQuiz()">重新练习</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    let selectedAnswer = '';
+    // 互连探索交互数据
+    const exploreData = {
+        bga: {
+            title: "🔮 BGA (球栅阵列) 深入探索：",
+            desc: "<strong>核心机制：</strong>底部由二维阵列焊料球（球径通常在 0.5-0.76mm）提供电互连与热路径。<br><strong>工程优势：</strong>引脚总数与面积成正比。回流焊时熔融焊料的表面张力可带来优异的<strong>自对准效应</strong>。<br><strong>可靠性痛点：</strong>对于大尺寸器件（如 >40×40mm），由于基板与PCB热膨胀系数（CTE）不匹配，在温度循环下焊料球会承受巨大的疲劳剪切应力，边缘焊点易率先开裂。"
+        },
+        cga: {
+            title: "💈 CGA (圆柱阵列) 深入探索：",
+            desc: "<strong>核心机制：</strong>由于大尺寸多层陶瓷基板（如高密度 CCGA）与普通玻璃纤维 PCB 的 CTE 差异极大，BGA 焊球在极端环境极易被生生剪断。CGA 采用<strong>高纵横比的焊料柱</strong>代替焊料球。<br><strong>工程优势：</strong>高细长的柱状结构具有极高的<strong>机械柔顺性</strong>，能通过自身微小的弯曲形变极大地释放剪切应力。<br><strong>可靠性痛点：</strong>广泛应用于航空航天、卫星、高端军工领域。其工艺窗口较窄，柱子根部常出现因应力集中而萌生裂纹的现象。"
+        },
+        lga: {
+            title: "🔲 LGA (触点阵列) 深入探索：",
+            desc: "<strong>核心机制：</strong>封装底部不预制焊球，而是制作一层扁平的金属点阵（Pad）。它并不直接焊死在PCB上，通常需要配合高精度的<strong>连接器/插座（Socket）</strong>利用机械压力压接。<br><strong>工程优势：</strong>① 整体安装高度显著降低；② 信号路径极短，阻抗极低，电学高速完整性极佳；③ <strong>维护极其便捷</strong>，CPU 烧毁或升级时可直接从 Socket 里抠出更换，无需动用复杂的返修台再回流。<br><strong>可靠性痛点：</strong>依靠接触触点机械压接，长期使用存在弹簧弹力退化、接触电阻因氧化而增大，或因振动导致瞬断的隐患。"
+        }
+    };
 
-    function selectOption(element, val) {
-        // 清除其他选项的高亮
-        let items = element.parentElement.getElementsByClassName('option-item');
-        for(let item of items) { item.classList.remove('selected'); }
-        // 高亮当前选项
-        element.classList.add('selected');
-        selectedAnswer = val;
+    function explore(type) {
+        const box = document.getElementById('exploreDetail');
+        box.style.display = 'block';
+        box.innerHTML = `<strong>${exploreData[type].title}</strong><br>${exploreData[type].desc}`;
+        // 滚动到探索细节
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    function checkAnswer() {
-        if (!selectedAnswer) { alert('请先选择一个选项！'); return; }
-        
-        const resultBox = document.getElementById('resultBox');
-        resultBox.style.display = 'block';
-        
-        if (selectedAnswer === 'B') {
-            resultBox.className = 'result correct';
-            resultBox.innerHTML = '<strong>🎉 回答正确！</strong><br>解析：正如文档所述，当器件引脚数超过200个时，外围引脚节距将逼近制造工艺极限，板级装配时极易发生焊膏桥连短路。而阵列封装（Area Array Package）正是为了突破这一外围引脚密度的几何限制。';
-        } else {
-            resultBox.className = 'result wrong';
-            resultBox.innerHTML = '<strong>❌ 回答错误。</strong>再想想看！提示：关注文档中关于“外围引脚节距（Pitch）”与“焊膏桥连”的描述。';
-        }
+    // 绑定选项点击事件
+    document.querySelectorAll('.option-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const siblings = this.parentElement.querySelectorAll('.option-item');
+            siblings.forEach(s => s.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+
+    // 提交全套题目
+    function submitQuiz() {
+        const questions = document.querySelectorAll('.question-card');
+        let correctCount = 0;
+        let totalCount = questions.length;
+
+        questions.forEach(q => {
+            const selectedOpt = q.querySelector('.option-item.selected');
+            const correctAnswer = q.getAttribute('data-answer');
+            const feedbackBox = q.querySelector('.feedback');
+            
+            feedbackBox.style.display = 'block';
+
+            if (!selectedOpt) {
+                feedbackBox.className = 'feedback wrong';
+                feedbackBox.innerHTML = `⚠️ <strong>未答：</strong>此题未选择。正确答案是 ${correctAnswer}。`;
+                return;
+            }
+
+            const userVal = selectedOpt.getAttribute('data-value');
+            
+            if (userVal === correctAnswer) {
+                correctCount++;
+                feedbackBox.className = 'feedback correct';
+                feedbackBox.innerHTML = `🎉 <strong>回答正确！</strong>`;
+            } else {
+                feedbackBox.className = 'feedback wrong';
+                feedbackBox.innerHTML = `❌ <strong>回答错误。</strong>你的选择是 ${userVal}，正确答案是 ${correctAnswer}。`;
+            }
+
+            // 针对经典硬核题提供个性化详细解析
+            if(q.getAttribute('data-qindex') === "6") {
+                feedbackBox.innerHTML += ` 教材解析：回流焊生成的金属间化合物（IMC，如η相Cu6Sn5和ε相Cu3Sn）本质上是<strong>硬脆性</strong>的。虽然它是保证电气互连和冶金结合的必要层，但过厚、应力集中时反而会成为脆性断裂源，绝非“柔性层”。`;
+            } else if (q.getAttribute('data-qindex') === "7") {
+                feedbackBox.innerHTML += ` 教材解析：Cu 原子向 Sn 中的扩散速率大于 Sn 向 Cu 的扩散速率，这种互扩散通量不平衡会导致 Cu3Sn/Cu 界面出现微空洞，即<strong>柯肯达尔空洞</strong>。`;
+            } else if (q.getAttribute('data-qindex') === "8") {
+                feedbackBox.innerHTML += ` 教材解析：在温度循环载荷下，由于芯片、基板和 PCB 的 <strong>CTE（热膨胀系数）错配</strong>，在温变时整个器件上下各层变形不对称，使得焊点产生周期性的剪切形变并萌生裂纹。`;
+            }
+        });
+
+        // 顶端显示总分横幅
+        const scoreBanner = document.getElementById('scoreBanner');
+        scoreBanner.style.display = 'block';
+        scoreBanner.innerHTML = `🎯 测试完成！你的得分：${correctCount} / ${totalCount} （正确率：${((correctCount/totalCount)*100).toFixed(0)}%）`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 重置
+    function resetQuiz() {
+        document.getElementById('quizForm').reset();
+        document.querySelectorAll('.option-item').forEach(item => item.classList.remove('selected'));
+        document.querySelectorAll('.feedback').forEach(f => f.style.display = 'none');
+        document.getElementById('scoreBanner').style.display = 'none';
+        document.getElementById('exploreDetail').style.display = 'none';
     }
 </script>
 
