@@ -55,15 +55,30 @@
         .explore-img-container { flex: 2; min-width: 240px; text-align: center; background: white; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
         .explore-img { display: none; width: 100%; height: auto; max-height: 180px; object-fit: contain; }
 
-        /* CTE模拟器 */
+        /* CTE模拟器增强 */
         .sim-container { display: flex; flex-direction: column; gap: 20px; background: #1e293b; color: #f8fafc; padding: 20px; border-radius: 8px; }
-        .cte-visual { height: 140px; position: relative; border-bottom: 4px solid #64748b; overflow: hidden; background: #0f172a; border-radius: 6px; }
-        .layer { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; font-size: 12px; font-weight: bold; line-height: 30px; border-radius: 4px; transition: transform 0.1s ease; }
-        .layer-chip { top: 15px; width: 200px; height: 30px; background: #38bdf8; color: #0f172a; }
-        .layer-pcb { bottom: 15px; width: 320px; height: 35px; background: #059669; color: white; }
-        .joint-container { position: absolute; top: 45px; left: 50%; transform: translateX(-50%); display: flex; justify-content: space-between; width: 180px; }
-        .solder-joint { width: 16px; height: 35px; background: #cbd5e1; border-radius: 4px; transition: all 0.1s ease; transform-origin: bottom center; position: relative; }
-        .crack-line { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--error-color); display: none; }
+        .cte-visual { height: 160px; position: relative; border-bottom: 4px solid #64748b; overflow: hidden; background: #0f172a; border-radius: 6px; }
+        .layer { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; font-size: 12px; font-weight: bold; border-radius: 4px; transition: transform 0.1s ease; }
+        
+        /* 丰富封装层次样式 */
+        .layer-chip { top: 10px; width: 140px; height: 22px; background: #38bdf8; color: #0f172a; line-height: 22px; z-index: 5; }
+        .layer-substrate { top: 32px; width: 240px; height: 20px; background: #6366f1; color: white; line-height: 20px; z-index: 4; font-size: 11px; }
+        .layer-pcb { bottom: 10px; width: 340px; height: 25px; background: #059669; color: white; line-height: 25px; }
+
+        /* 真正的球形焊点与包装容器 */
+        .joint-container { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); display: flex; justify-content: space-between; width: 210px; z-index: 3; }
+        .solder-ball-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; }
+        .solder-ball { width: 24px; height: 24px; background: #cbd5e1; border-radius: 50%; transition: all 0.1s ease; transform-origin: top center; position: relative; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.3); }
+
+        /* DNP 文本微型标签 */
+        .dnp-tag { font-size: 9px; color: #94a3b8; margin-top: 4px; font-family: monospace; }
+
+        /* 渐进式裂纹线条 */
+        .crack-line-progressive { position: absolute; top: 2px; left: 10%; width: 0%; height: 3px; background: var(--error-color); transition: width 0.1s ease; border-radius: 2px; }
+
+        /* Underfill 胶层半透明视觉表现 */
+        .underfill-layer { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); width: 230px; height: 26px; background: rgba(245, 158, 11, 0.35); border: 1px dashed #f59e0b; border-radius: 4px; z-index: 2; pointer-events: none; }
+
         .slider-box { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; }
         .slider-box input { flex: 1; }
 
@@ -108,7 +123,7 @@
 <div class="container">
     <header>
         <h1>9.3 阵列封装 高级交互控制台</h1>
-        <p>电子教材配套微电子封装技术互动平台 </p>
+        <p>电子教材配套微电子封装技术互动平台</p>
     </header>
 
     <div class="section-card">
@@ -171,23 +186,49 @@
 
     <div class="section-card">
         <h3 class="section-title">⏳ 热循环板级应变模拟器（CTE 失配演示）</h3>
-        <p style="font-size: 14px; color: #64748b; margin-top:-10px;">调节服役环境温度，由于芯片（$\alpha \approx 3\,\text{ppm}/^\circ\text{C}$）与 PCB（$\alpha \approx 16\,\text{ppm}/^\circ\text{C}$）的 CTE 严重错配，观察外围焊点承受的剪切应变：</p>
+        <p style="font-size: 14px; color: #64748b; margin-top:-10px;">调节服役环境温度，由于芯片、封装基板与 PCB 的 CTE 错配，观察应变公式 $\gamma \propto (\alpha_{\text{PCB}} - \alpha_{\text{pkg}}) \cdot \Delta T \cdot \text{DNP}$ 的实际映射表现：</p>
         <div class="sim-container">
             <div class="cte-visual">
-                <div id="simChip" class="layer layer-chip">Si 芯片 / 陶瓷基板 (低 CTE)</div>
+                <div id="simChip" class="layer layer-chip">Si 芯片 (Die) [$\alpha \approx 3\,\text{ppm}/^\circ\text{C}$]</div>
+                
+                <div id="simSubstrate" class="layer layer-substrate">封装基板 (Substrate) [$\alpha \approx 7\,\text{ppm}/^\circ\text{C}$]</div>
+                
+                <div id="underfillEl" class="underfill-layer" style="display:none;"></div>
+
                 <div class="joint-container">
-                    <div class="solder-joint" id="jointL"><div class="crack-line"></div></div>
-                    <div class="solder-joint" id="jointM"></div>
-                    <div class="solder-joint" id="jointR"><div class="crack-line"></div></div>
+                    <div class="solder-ball-wrapper" id="ballWrapperL">
+                        <div class="solder-ball" id="jointL">
+                            <div class="crack-line-progressive" id="crackL"></div>
+                        </div>
+                        <div class="dnp-tag">Max DNP</div>
+                    </div>
+                    
+                    <div class="solder-ball-wrapper" id="ballWrapperM">
+                        <div class="solder-ball" id="jointM"></div>
+                        <div class="dnp-tag">DNP ≈ 0</div>
+                    </div>
+                    
+                    <div class="solder-ball-wrapper" id="ballWrapperR">
+                        <div class="solder-ball" id="jointR">
+                            <div class="crack-line-progressive" id="crackR"></div>
+                        </div>
+                        <div class="dnp-tag">Max DNP</div>
+                    </div>
                 </div>
-                <div id="simPCB" class="layer layer-pcb">FR-4 PCB 主板 (高 CTE)</div>
+                
+                <div id="simPCB" class="layer layer-pcb">FR-4 PCB 主板 [$\alpha \approx 16\,\text{ppm}/^\circ\text{C}$]</div>
             </div>
             <div class="slider-box">
                 <span>环境温度 ($T$): </span>
                 <input type="range" id="tempSlider" min="-55" max="125" value="25">
                 <span id="tempDisplay" style="font-family:monospace; font-weight:bold; color:var(--secondary-color);">25 °C</span>
             </div>
-            <div id="simFeedback" style="font-size:13px; color:#94a3b8; margin-top:-5px;"></div>
+            <div class="slider-box" style="margin-top: -10px; background: rgba(255,255,255,0.02); border-top: 1px dashed rgba(255,255,255,0.1);">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-size:13px; color:#38bdf8;">
+                    <input type="checkbox" id="underfillCheckbox"> 🛠️ 启用环氧树脂下填料 (Underfill 固化强化设计)
+                </label>
+            </div>
+            <div id="simFeedback" style="font-size:13px; color:#94a3b8; margin-top: 5px; min-height: 40px;"></div>
         </div>
     </div>
 
@@ -254,7 +295,7 @@
                 <ul class="options-list">
                     <li class="option-item" data-value="A">A. 封装体内引线框架热膨胀系数不匹配导致断裂</li>
                     <li class="option-item" data-value="B">B. 外围引脚节距（Pitch）逼近工艺极限，板级装配时极易发生焊膏桥连短路</li>
-                    <li class="option-item" data-value="C">C. <b>C.</b> 周边引线过长，导致严重的声学噪声耦合</li>
+                    <li class="option-item" data-value="C">C. C. 周边引线过长，导致严重的声学噪声耦合</li>
                     <li class="option-item" data-value="D">D. 二维边缘引脚极易吸潮导致塑封体发生“爆米花”效应</li>
                 </ul>
                 <div class="feedback"></div>
@@ -402,6 +443,7 @@
 
         // 绑定事件滑块和评估按钮
         document.getElementById('tempSlider').addEventListener('input', runCteSimulation);
+        document.getElementById('underfillCheckbox').addEventListener('change', runCteSimulation);
         document.getElementById('imcSlider').addEventListener('input', runImcEvolution);
         document.getElementById('btnFA').addEventListener('click', evaluateFA);
         document.getElementById('btnDesign').addEventListener('click', evaluateDesign);
@@ -519,41 +561,93 @@
         }
     }
 
-    // 动态模拟 ①: CTE 板级剪切变动
+    // 动态模拟 ①: CTE 深度工程化变形剪切
     function runCteSimulation() {
         const T = parseInt(document.getElementById('tempSlider').value);
+        const hasUnderfill = document.getElementById('underfillCheckbox').checked;
         document.getElementById('tempDisplay').innerText = `${T} °C`;
         
-        const dT = T - 25;
-        const shiftX = dT * 0.25; 
+        // 显示或隐藏 Underfill 视觉层
+        document.getElementById('underfillEl').style.display = hasUnderfill ? 'block' : 'none';
         
-        document.getElementById('simChip').style.transform = `translateX(calc(-50% - ${shiftX * 0.4}px))`;
-        document.getElementById('simPCB').style.transform = `translateX(calc(-50% + ${shiftX * 0.6}px))`;
+        const dT = T - 25; // 计算温差 ΔT
         
-        const skewAngle = dT * 0.15;
-        const jointL = document.getElementById('jointL');
-        const jointR = document.getElementById('jointR');
+        // 模拟各层材料由于 CTE 错配产生的相对剪切位移量
+        // Si(3 ppm) < Substrate(7 ppm) < PCB(16 ppm)
+        const chipShift = dT * 0.1;
+        const subShift = dT * 0.25;
+        const pcbShift = dT * 0.65;
         
-        jointL.style.transform = `skewX(${skewAngle}deg)`;
-        jointR.style.transform = `skewX(${skewAngle}deg)`;
+        document.getElementById('simChip').style.transform = `translateX(calc(-50% - ${chipShift}px))`;
+        document.getElementById('simSubstrate').style.transform = `translateX(calc(-50% - ${subShift}px))`;
+        document.getElementById('simPCB').style.transform = `translateX(calc(-50% + ${pcbShift}px))`;
+        
+        // 引入 DNP (Distance from Neutral Point) 概念控制角焊球应变
+        // 剪切角公式: γ ∝ Δα * ΔT * DNP
+        let baseSkew = dT * 0.22;
+        
+        // 如果引入了 Underfill，高分子胶层会全局分担并锁住大部分剪切应力（形变降低至原先的 25%）
+        if (hasUnderfill) {
+            baseSkew *= 0.25;
+        }
 
-        const crackLines = document.querySelectorAll('.crack-line');
+        const jointL = document.getElementById('jointL');
+        const jointM = document.getElementById('jointM');
+        const jointR = document.getElementById('jointR');
+        const crackL = document.getElementById('crackL');
+        const crackR = document.getElementById('crackR');
         const feedback = document.getElementById('simFeedback');
-        if (Math.abs(dT) > 75) {
-            crackLines.forEach(line => line.style.display = 'block');
-            jointL.style.background = '#f87171';
-            jointR.style.background = '#f87171';
-            feedback.innerHTML = `⚠️ <strong>工程开裂警报：</strong>热冲击温差 $\\Delta T = ${Math.abs(dT)}^\\circ\\text{C}$ 严重超标。由于 $\\alpha_{\\text{PCB}} \\gg \\alpha_{\\text{Chip}}$，外围焊点遭遇严重塑性剪切形变，萌生<strong>热疲劳微裂纹（Thermal Crack）</strong>！`;
-        } else {
-            crackLines.forEach(line => line.style.display = 'none');
+
+        // 核心物理体现：中心焊球（DNP ≈ 0）几乎不发生剪切偏转
+        document.getElementById('ballWrapperM').style.transform = `translateX(-50%)`;
+        jointM.style.transform = `skewX(${baseSkew * 0.05}deg)`;
+        
+        // 外围角焊球（DNP 最大）承受饱满的剪切形变与平移
+        const edgeSkew = baseSkew * 1.0; 
+        jointL.style.transform = `skewX(${edgeSkew}deg)`;
+        jointR.style.transform = `skewX(${edgeSkew}deg)`;
+
+        // 计算实际承受的等效剪切应变指标（用于判断渐进失效的阈值）
+        const effectiveStrain = Math.abs(edgeSkew);
+
+        // 渐进式失效分析四阶段状态机
+        if (effectiveStrain === 0) {
+            // 阶段 1: 无应变
             jointL.style.background = '#cbd5e1';
             jointR.style.background = '#cbd5e1';
-            feedback.innerHTML = `✨ 当前形变控制在材料弹性应变极限内，内部正在周期性积攒应力损伤。`;
+            crackL.style.width = '0%';
+            crackR.style.width = '0%';
+            feedback.innerHTML = `✨ <strong>热平衡态 ($25^\\circ\\text{C}$):</strong> 结构内部零热应力，处于完美弹性安全区。`;
+        } 
+        else if (effectiveStrain > 0 && effectiveStrain <= 6) {
+            // 阶段 2: 弹性变形 / 轻微蠕变
+            jointL.style.background = '#cbd5e1';
+            jointR.style.background = '#cbd5e1';
+            crackL.style.width = '0%';
+            crackR.style.width = '0%';
+            feedback.innerHTML = `⏳ <strong>弹性与塑性蠕变阶段:</strong> 应变 $\\gamma \\propto \\Delta\\alpha \\cdot \\Delta T \\cdot \\text{DNP}$ 开始积攒。由于中心对称性，<strong>中心焊球几乎不受剪切应力，而最外侧角焊球形变最显著</strong>。`;
+        } 
+        else if (effectiveStrain > 6 && effectiveStrain <= 13) {
+            // 阶段 3: 萌生微裂纹
+            jointL.style.background = '#fbbf24'; // 变黄
+            jointR.style.background = '#fbbf24';
+            crackL.style.width = '45%'; // 裂纹显现 45%
+            crackR.style.width = '45%';
+            feedback.innerHTML = `🚧 <strong>微裂纹萌生 (Micro-cracking):</strong> 累积的热疲劳导致外围角焊球的晶粒粗化，在应力集中最高的界面根部<strong>已萌生微小裂纹</strong>！${hasUnderfill ? '（Underfill 已有效延缓并减小了形变损伤）' : ''}`;
+        } 
+        else {
+            // 阶段 4: 疲劳断裂
+            jointL.style.background = '#f87171'; // 变红
+            jointR.style.background = '#f87171';
+            crackL.style.width = '90%'; // 裂纹几乎横穿
+            crackR.style.width = '90%';
+            feedback.innerHTML = `⚠️ <strong>工程疲劳开裂警报 (Fatigue Failure):</strong> 恶劣温差使外围剪切应变突破极限！裂纹完全贯穿，导致<strong>板级电路开路失效</strong>。此时中心中性点（DNP=0）焊球依然完好，印证了最大应力局域化效应。`;
         }
+
         if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
 
-    // 动态模拟 ⑤: IMC 层化生长和空洞分布
+    // 动态模拟 ⑤: IMC 层的化生长和空洞分布
     function runImcEvolution() {
         const hours = parseInt(document.getElementById('imcSlider').value);
         document.getElementById('imcDisplay').innerText = `${hours} h`;
@@ -606,6 +700,7 @@
         }
     }
 
+    // 复杂选型评定
     function evaluateDesign() {
         const val = document.getElementById('selectDesign').value;
         const box = document.getElementById('designFeedback');
@@ -626,7 +721,7 @@
         if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
 
-    // 单题即点即评与深度选项剖析
+    // 单题即点即评
     function checkAnswer(qId, userValue) {
         const card = document.getElementById(qId);
         if (card.classList.contains('locked')) return;
@@ -646,7 +741,7 @@
 
         if (userValue === correctAnswer) {
             feedbackBox.className = 'feedback correct';
-            feedbackBox.innerHTML = `<div class="feedback-title">🎉 回回答正确！</div>`;
+            feedbackBox.innerHTML = `<div class="feedback-title">🎉 回答正确！</div>`;
         } else {
             feedbackBox.className = 'feedback wrong';
             feedbackBox.innerHTML = `<div class="feedback-title">❌ 回答错误。你选择了 ${userValue}，正确答案是 ${correctAnswer}。</div>`;
@@ -676,6 +771,7 @@
         document.getElementById('selectDesign').value = "";
         document.getElementById('tempSlider').value = 25;
         document.getElementById('imcSlider').value = 0;
+        document.getElementById('underfillCheckbox').checked = false;
         
         runCteSimulation();
         runImcEvolution();
