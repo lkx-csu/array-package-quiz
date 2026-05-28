@@ -93,7 +93,7 @@
     margin-top: 12px;     /* 上方 Standoff Height */
     margin-bottom: 6px;   /* 仅保留真实互连间隙，不再为 DNP 标签撑开空间 */
     position: relative; 
-    z-index: 3;
+    z-index: 8;
 }
 
 .solder-ball-wrapper { 
@@ -101,34 +101,27 @@
     flex-direction: column; 
     align-items: center; 
     position: relative; 
+    width: 24px;
+    height: 24px;
+    z-index: 8;
 }
 
-/* DNP 标签作为悬浮标注，不参与焊球-PCB 的结构间距 */
-.dnp-tag { 
-    position: absolute;
-    top: 50%;
-    font-size: 9px; 
-    line-height: 1;
-    color: #94a3b8; 
-    font-family: monospace; 
-    white-space: nowrap;
-    pointer-events: none;
-    transform: translateY(-50%);
+/* 圆润真实的球体 */
+.solder-ball {
+    width: 24px;
+    height: 24px;
+    background: #cbd5e1;
+    border-radius: 50%;
+    transition: all 0.1s ease;
+    transform-origin: top center;
+    position: relative;
+    z-index: 9;
+    box-shadow: inset -3px -3px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.solder-ball-wrapper:first-child .dnp-tag {
-    right: calc(100% + 10px);
-    text-align: right;
-}
-
-.solder-ball-wrapper:nth-child(2) .dnp-tag {
-    top: -11px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.solder-ball-wrapper:last-child .dnp-tag {
-    left: calc(100% + 10px);
+/* 去掉 DNP 图中文字，避免遮挡结构示意 */
+.dnp-tag {
+    display: none;
 }
 
 /* Underfill 胶层下移并加高，覆盖焊球中下部和基板-PCB 间隙 */
@@ -137,7 +130,7 @@
     top: 118px; 
     width: 238px; 
     height: 38px; 
-    background: rgba(245, 158, 11, 0.35); 
+    background: rgba(245, 158, 11, 0.32); 
     border: 1px dashed #f59e0b; 
     border-radius: 4px; 
     z-index: 2; 
