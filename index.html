@@ -4,118 +4,251 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9.3 阵列封装 交互式互动学习库</title>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            chtml: { displayAlign: 'left' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
         :root {
             --primary-color: #1e3a8a;
             --secondary-color: #3b82f6;
             --success-color: #10b981;
             --error-color: #ef4444;
+            --warning-color: #f59e0b;
             --bg-color: #f8fafc;
             --text-color: #334155;
         }
         body { font-family: 'Helvetica Neue', Arial, 'PingFang SC', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; line-height: 1.6; }
-        .container { max-width: 800px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        header h1 { margin: 0; font-size: 28px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 35px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        header h1 { margin: 0; font-size: 30px; letter-spacing: 1px; }
         header p { margin: 10px 0 0; opacity: 0.9; font-size: 15px; }
         
-        .interactive-section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        .section-title { color: var(--primary-color); border-left: 5px solid var(--secondary-color); padding-left: 10px; font-size: 20px; margin-top: 0; margin-bottom: 20px; }
-        .visual-board { display: flex; justify-content: space-around; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
-        .structure-card { flex: 1; min-width: 220px; background: #f1f5f9; border: 2px solid #e2e8f0; padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; text-align: center; }
-        .structure-card:hover { border-color: var(--secondary-color); background: #eff6ff; transform: translateY(-2px); }
-        .structure-card.active { border-color: var(--secondary-color); background: #eff6ff; box-shadow: 0 0 8px rgba(59,130,246,0.3); }
-        .structure-icon { font-size: 24px; margin-bottom: 8px; }
-        .structure-title { font-weight: bold; color: var(--primary-color); margin-bottom: 5px; }
+        .section-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0; }
+        .section-title { color: var(--primary-color); border-left: 5px solid var(--secondary-color); padding-left: 12px; font-size: 20px; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
         
-        .explore-detail-box { margin-top: 15px; padding: 20px; background: #ecfdf5; border-left: 4px solid var(--success-color); border-radius: 4px; display: none; }
-        .explore-flex { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-        .explore-text { flex: 3; font-size: 14px; text-align: left; }
-        .explore-img-container { flex: 2; min-width: 240px; text-align: center; background: white; padding: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        /* 探索模块布局 */
+        .explore-grid { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .visual-board { display: flex; flex-direction: column; gap: 12px; flex: 1; min-width: 250px; }
+        .structure-card { background: #f1f5f9; border: 2px solid #e2e8f0; padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 15px; }
+        .structure-card:hover { border-color: var(--secondary-color); background: #eff6ff; transform: translateX(3px); }
+        .structure-card.active { border-color: var(--secondary-color); background: #eff6ff; box-shadow: 0 0 8px rgba(59,130,246,0.2); }
+        .structure-icon { font-size: 24px; }
+        .structure-title { font-weight: bold; color: var(--primary-color); }
         
-        /* 真实工业切片图片自适应样式 */
-        .explore-img { display: none; width: 100%; height: auto; max-height: 200px; object-fit: contain; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; }
+        /* 数据驱动雷达图面板 */
+        .radar-panel { flex: 1; min-width: 280px; background: #fafafa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .radar-container { width: 220px; height: 220px; position: relative; margin: 10px 0; }
+        #radarCanvas { width: 120%; height: 120%; position: absolute; top: -10%; left: -10%; }
+        
+        .explore-detail-box { padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 15px; }
+        .explore-flex { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+        .explore-text { flex: 3; min-width: 260px; font-size: 14px; }
+        .explore-img-container { flex: 2; min-width: 240px; text-align: center; background: white; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .explore-img { display: none; width: 100%; height: auto; max-height: 180px; object-fit: contain; }
 
-        /* 题库样式 */
-        .quiz-section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        /* CTE模拟器 */
+        .sim-container { display: flex; flex-direction: column; gap: 20px; background: #1e293b; color: #f8fafc; padding: 20px; border-radius: 8px; }
+        .cte-visual { height: 140px; position: relative; border-bottom: 4px solid #64748b; overflow: hidden; background: #0f172a; border-radius: 6px; }
+        .layer { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; font-size: 12px; font-weight: bold; line-height: 30px; border-radius: 4px; transition: transform 0.1s ease; }
+        .layer-chip { top: 15px; width: 200px; height: 30px; background: #38bdf8; color: #0f172a; }
+        .layer-pcb { bottom: 15px; width: 320px; height: 35px; background: #059669; color: white; }
+        .joint-container { position: absolute; top: 45px; left: 50%; transform: translateX(-50%); display: flex; justify-content: space-between; width: 180px; }
+        .solder-joint { width: 16px; height: 35px; background: #cbd5e1; border-radius: 4px; transition: all 0.1s ease; transform-origin: bottom center; position: relative; }
+        .crack-line { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--error-color); display: none; }
+        .slider-box { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; }
+        .slider-box input { flex: 1; }
+
+        /* IMC 演化轴 */
+        .imc-stage-flex { display: flex; gap: 20px; flex-wrap: wrap; }
+        .imc-diagram { flex: 1; min-width: 280px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; height: 200px; display: flex; flex-direction: column; }
+        .imc-layer-bar { height: 35px; margin: 2px 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border-radius: 4px; color: white; transition: all 0.3s; }
+        .imc-cu { background: #b45309; height: 45px; }
+        .imc-cu3sn { background: #78350f; height: 0px; opacity: 0; }
+        .imc-cu6sn5 { background: #d97706; height: 0px; opacity: 0; }
+        .imc-solder { background: #94a3b8; height: 60px; color: #1e293b; position: relative; }
+        .void-dots { position: absolute; width: 6px; height: 6px; background: #0f172a; border-radius: 50%; display: none; }
+
+        /* 失效诊断与选型 */
+        .grid-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .select-input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 14px; margin-bottom: 12px; }
+        .interactive-btn { background-color: var(--secondary-color); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s; }
+        .interactive-btn:hover { background-color: #2563eb; }
+        .alert-info { margin-top: 10px; padding: 12px; border-radius: 6px; font-size: 13px; display: none; }
+
+        /* 题库常规样式 */
         .question-card { border-bottom: 1px dashed #e2e8f0; padding-bottom: 20px; margin-bottom: 25px; }
         .question-card:last-child { border-bottom: none; }
         .question-title { font-weight: 600; font-size: 16px; margin-bottom: 12px; color: #1e293b; }
         .options-list { list-style: none; padding: 0; margin: 0; }
-        
-        .option-item { padding: 12px 15px; margin: 6px 0; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 14px; line-height: 1.4; }
+        .option-item { padding: 12px 15px; margin: 6px 0; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 14px; }
         .option-item:hover { background-color: #f8fafc; border-color: #94a3b8; }
-        
         .question-card.locked .option-item { cursor: not-allowed; pointer-events: none; }
         .option-item.correct-choice { background-color: #dcfce7 !important; border-color: var(--success-color) !important; color: #14532d; font-weight: 600; }
         .option-item.wrong-choice { background-color: #fee2e2 !important; border-color: var(--error-color) !important; color: #7f1d1d; }
-        
-        .feedback { margin-top: 12px; padding: 15px; border-radius: 6px; font-size: 14px; display: none; line-height: 1.5; }
+        .feedback { margin-top: 12px; padding: 15px; border-radius: 6px; font-size: 14px; display: none; }
         .feedback.correct { background-color: #dcfce7; color: #14532d; border: 1px solid #bbf7d0; }
         .feedback.wrong { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fecaca; }
-        
-        .feedback-title { font-weight: bold; margin-bottom: 5px; font-size: 15px; }
         .option-explanation-list { margin-top: 10px; padding-left: 20px; font-size: 13px; color: #475569; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px; }
         .option-explanation-list li { margin-bottom: 5px; }
-
-        button { background-color: #64748b; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: background 0.2s; margin-top: 10px; }
-        button:hover { background-color: #475569; }
+        .reset-btn { background-color: #64748b; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: background 0.2s; }
+        .reset-btn:hover { background-color: #475569; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>9.3 阵列封装 互动学习控制台</h1>
-        <p>本书配套微电子封装技术交互式习题库 —— 选项即点即评 ➕ 真实学术截面探索</p>
+        <h1>9.3 阵列封装</h1>
+        <p>电子教材配套微电子封装技术互动平台</p>
     </header>
 
-    <div class="interactive-section">
-        <h3 class="section-title">💡 阵列互连结构 显微镜探索</h3>
-        <p style="font-size: 14px; color: #64748b; margin-top:-10px;">点击下方不同的封装互连端子形态，探索其高清晰显微结构、工程定位与失效风险：</p>
-        <div class="visual-board">
-            <div id="card-bga" class="structure-card" onclick="explore('bga')">
-                <div class="structure-icon">🔮</div>
-                <div class="structure-title">BGA (球栅阵列)</div>
-                <div class="structure-desc" style="font-size:12px; color:#64748b;">焊料球互连</div>
+    <div class="section-card">
+        <h3 class="section-title">💡 互连结构微观探索 & 动态数据雷达</h3>
+        <p style="font-size: 14px; color: #64748b; margin-top:-10px;">点击封装卡片，右侧 Canvas 引擎将动态渲染真实量化指标，下方展现学术显微切片图：</p>
+        
+        <div class="explore-grid">
+            <div class="visual-board">
+                <div id="card-bga" class="structure-card" data-type="bga">
+                    <div class="structure-icon">🔮</div>
+                    <div>
+                        <div class="structure-title">BGA (球栅阵列)</div>
+                        <div style="font-size:12px; color:#64748b;">焊料球面阵互连，表面张力自对准效应显著</div>
+                    </div>
+                </div>
+                <div id="card-cga" class="structure-card" data-type="cga">
+                    <div class="structure-icon">💈</div>
+                    <div>
+                        <div class="structure-title">CGA (圆柱阵列)</div>
+                        <div style="font-size:12px; color:#64748b;">高纵横比焊料柱，提供机械柔顺性释放应力</div>
+                    </div>
+                </div>
+                <div id="card-lga" class="structure-card" data-type="lga">
+                    <div class="structure-icon">🔲</div>
+                    <div>
+                        <div class="structure-title">LGA (触点阵列)</div>
+                        <div style="font-size:12px; color:#64748b;">平面触点弹簧 Socket 压接，极低寄生电感</div>
+                    </div>
+                </div>
             </div>
-            <div id="card-cga" class="structure-card" onclick="explore('cga')">
-                <div class="structure-icon">💈</div>
-                <div class="structure-title">CGA (圆柱阵列)</div>
-                <div class="structure-desc" style="font-size:12px; color:#64748b;">焊料柱互连</div>
-            </div>
-            <div id="card-lga" class="structure-card" onclick="explore('lga')">
-                <div class="structure-icon">🔲</div>
-                <div class="structure-title">LGA (触点阵列)</div>
-                <div class="structure-desc" style="font-size:12px; color:#64748b;">平面触点金属衬垫</div>
+            
+            <div class="radar-panel">
+                <div style="font-size:13px; font-weight:bold; color:var(--primary-color);">📊 封装全维度工艺能力雷达</div>
+                <div class="radar-container">
+                    <canvas id="radarCanvas" width="260" height="260"></canvas>
+                </div>
+                <div id="radarDesc" style="font-size:11px; color:#64748b; text-align:center; margin-top: 5px; padding: 0 10px;"></div>
             </div>
         </div>
         
-        <div id="exploreDetailBox" class="explore-detail-box">
+        <div id="exploreDetailBox" class="explore-detail-box" style="display:none;">
             <div class="explore-flex">
                 <div id="exploreText" class="explore-text"></div>
                 <div class="explore-img-container">
-                    <div style="font-size: 11px; color:#94a3b8; margin-bottom:6px;">🔬 工业学术真实截面图</div>
-                    
-                    <img id="img-bga" class="explore-img" src="" alt="BGA 真实显微截面图">
-                    <img id="img-cga" class="explore-img" src="" alt="CGA 真实显微截面图">
-                    <img id="img-lga" class="explore-img" src="" alt="LGA 真实压接 Socket 结构图">
-
+                    <div style="font-size: 11px; color:#94a3b8; margin-bottom:6px;">🔬 真实电子显微截面（SEM）/ 压接结构</div>
+                    <img id="img-bga" class="explore-img" src="./bga.png" alt="BGA 真实 SEM 截面图">
+                    <img id="img-cga" class="explore-img" src="./cga.png" alt="CGA 真实细长焊料柱显微结构">
+                    <img id="img-lga" class="explore-img" src="./lga.png" alt="LGA 弹性 Socket 机械压接剖面图">
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="quiz-section">
-        <h3 class="section-title">📝 随堂核心概念通关测试（点击选项即刻评测）</h3>
+    <div class="section-card">
+        <h3 class="section-title">⏳ 热循环板级应变模拟器（CTE 失配演示）</h3>
+        <p style="font-size: 14px; color: #64748b; margin-top:-10px;">调节服役环境温度，由于芯片（$\alpha \approx 3\,\text{ppm}/^\circ\text{C}$）与 PCB（$\alpha \approx 16\,\text{ppm}/^\circ\text{C}$）的 CTE 严重错配，观察外围焊点承受的剪切应变：</p>
+        <div class="sim-container">
+            <div class="cte-visual">
+                <div id="simChip" class="layer layer-chip">Si 芯片 / 陶瓷基板 (低 CTE)</div>
+                <div class="joint-container">
+                    <div class="solder-joint" id="jointL"><div class="crack-line"></div></div>
+                    <div class="solder-joint" id="jointM"></div>
+                    <div class="solder-joint" id="jointR"><div class="crack-line"></div></div>
+                </div>
+                <div id="simPCB" class="layer layer-pcb">FR-4 PCB 主板 (高 CTE)</div>
+            </div>
+            <div class="slider-box">
+                <span>环境温度 ($T$): </span>
+                <input type="range" id="tempSlider" min="-55" max="125" value="25">
+                <span id="tempDisplay" style="font-family:monospace; font-weight:bold; color:var(--secondary-color);">25 °C</span>
+            </div>
+            <div id="simFeedback" style="font-size:13px; color:#94a3b8; margin-top:-5px;"></div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h3 class="section-title">🔬 界面 IMC 金属间化合物与空洞演化轴</h3>
+        <p style="font-size: 14px; color: #64748b; margin-top:-10px;">移动时效时间滑块，观察回流焊及热老化过程中，钎料与 Cu 衬垫界面 IMC 厚度激增以及空洞的形成：</p>
+        <div class="imc-stage-flex">
+            <div class="imc-diagram">
+                <div class="imc-solder">Bulk 焊料层 (Sn-based)
+                    <div class="void-dots" style="bottom:2px; left:30px;" id="vd1"></div>
+                    <div class="void-dots" style="bottom:4px; left:120px;" id="vd2"></div>
+                    <div class="void-dots" style="bottom:1px; left:210px;" id="vd3"></div>
+                </div>
+                <div id="layerCu6Sn5" class="imc-layer-bar imc-cu6sn5">$\text{Cu}_6\text{Sn}_5$ ($\eta$ 相)</div>
+                <div id="layerCu3Sn" class="imc-layer-bar imc-cu3sn">$\text{Cu}_3\text{Sn}$ ($\varepsilon$ 相)</div>
+                <div class="imc-layer-bar imc-cu">Cu 衬垫基底</div>
+            </div>
+            <div style="flex:1; min-width:260px; display:flex; flex-direction:column; justify-content:space-between;">
+                <div class="slider-box" style="background:#f1f5f9; color:var(--text-color);">
+                    <span>时效时间 (小时): </span>
+                    <input type="range" id="imcSlider" min="0" max="1000" value="0">
+                    <span id="imcDisplay" style="font-weight:bold; color:var(--primary-color);">0 h</span>
+                </div>
+                <div id="imcText" style="font-size:13px; background:#f8fafc; padding:15px; border-radius:6px; border:1px solid #e2e8f0; min-height:80px;">
+                    <strong>初始状态：</strong>回流焊前，焊料与铜衬垫边界分明，尚未发生高温冶金反应。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2col">
+        <div class="section-card">
+            <h3 class="section-title">🔍 失效分析工程师模式</h3>
+            <p style="font-size:13px; color:#64748b;">工厂送检来一批受热循环破坏的 BGA 样品，在 X-Ray / SEM 下观察到焊料球与衬垫发生分离但未完全熔合，呈现“枕头叠放”状，这属于什么典型失效？</p>
+            <select id="faSelect" class="select-input">
+                <option value="">-- 请选择断定结论 --</option>
+                <option value="void">界面柯肯达尔空洞 (Kirkendall Voiding)</option>
+                <option value="hip">枕头效应 (Head-in-Pillow, HIP)</option>
+                <option value="crack">应力集中导致的热疲劳开裂 (Thermal Crack)</option>
+            </select>
+            <button class="interactive-btn" id="btnFA">提交诊断结论</button>
+            <div id="faFeedback" class="alert-info"></div>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">🎯 复杂场景封装选型挑战</h3>
+            <p style="font-size:13px; color:#64748b;">工程任务：设计一款用于深空探测卫星的核心控制机主板，芯片引脚数 800+，服役环境伴随极其严酷的极高/极低温剧烈交变（$\Delta T > 150^\circ\text{C}$），不允许板级返修，首选何种封装？</p>
+            <select id="selectDesign" class="select-input">
+                <option value="">-- 请评估并选择最适工艺 --</option>
+                <option value="BGA">塑料球栅阵列封装 (PBGA)</option>
+                <option value="CGA">陶瓷圆柱阵列封装 (CCGA)</option>
+                <option value="LGA">触点阵列封装 + 压接插座连接</option>
+            </select>
+            <button class="interactive-btn" id="btnDesign">确认方案选型</button>
+            <div id="designFeedback" class="alert-info"></div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h3 class="section-title">📝 随堂核心概念通关测试（选项即点即评）</h3>
         <form id="quizForm">
             <div class="question-card" id="q1" data-answer="B">
                 <div class="question-title">Q1. 当器件引脚数超过 200 个时，传统的四边外围引线封装（如 QFP）装配时面临的最主要几何限制及失效风险是？</div>
                 <ul class="options-list">
-                    <li class="option-item" data-value="A" onclick="checkAnswer('q1', 'A')">A. 封装体内引线框架热膨胀系数不匹配导致断裂</li>
-                    <li class="option-item" data-value="B" onclick="checkAnswer('q1', 'B')">B. 外围引脚节距（Pitch）逼近工艺极限，板级装配时极易发生焊膏桥连短路</li>
-                    <li class="option-item" data-value="C" onclick="checkAnswer('q1', 'C')">C. 周边引线过长，导致严重的声学噪声耦合</li>
-                    <li class="option-item" data-value="D" onclick="checkAnswer('q1', 'D')">D. 二维边缘引脚极易吸潮导致塑封体发生“爆米花”效应</li>
+                    <li class="option-item" data-value="A">A. 封装体内引线框架热膨胀系数不匹配导致断裂</li>
+                    <li class="option-item" data-value="B">B. 外围引脚节距（Pitch）逼近工艺极限，板级装配时极易发生焊膏桥连短路</li>
+                    <li class="option-item" data-value="C">C. 周边引线过长，导致严重的声学噪声耦合</li>
+                    <li class="option-item" data-value="D">D. 二维边缘引脚极易吸潮导致塑封体发生“爆米花”效应</li>
                 </ul>
                 <div class="feedback"></div>
             </div>
@@ -123,10 +256,10 @@
             <div class="question-card" id="q2" data-answer="A">
                 <div class="question-title">Q2. BGA 封装回流焊过程中，共晶/近共晶焊料球能够自动修正芯片放置偏差、提升对准精度的物理机理是？</div>
                 <ul class="options-list">
-                    <li class="option-item" data-value="A" onclick="checkAnswer('q2', 'A')">A. 熔融焊料的表面张力产生“自对准效应（Self-alignment Effect）”</li>
-                    <li class="option-item" data-value="B" onclick="checkAnswer('q2', 'B')">B. 下填料（Underfill）固化时的毛细管虹吸作用</li>
-                    <li class="option-item" data-value="C" onclick="checkAnswer('q2', 'C')">C. 基板与 PCB 之间的重力电磁场匹配</li>
-                    <li class="option-item" data-value="D" onclick="checkAnswer('q2', 'D')">D. 助焊剂高温挥发释放的水平气流反冲</li>
+                    <li class="option-item" data-value="A">A. 熔融焊料的表面张力产生“自对准效应（Self-alignment Effect）”</li>
+                    <li class="option-item" data-value="B">B. 下填料（Underfill）固化时的毛细管虹吸作用</li>
+                    <li class="option-item" data-value="C">C. 基板与 PCB 之间的重力电磁场匹配</li>
+                    <li class="option-item" data-value="D">D. 助焊剂高温挥发释放的水平气流反冲</li>
                 </ul>
                 <div class="feedback"></div>
             </div>
@@ -134,10 +267,10 @@
             <div class="question-card" id="q3" data-answer="C">
                 <div class="question-title">Q3. 针对大尺寸、高功耗以及军工航天等高可靠性要求的高端芯片，CGA（圆柱阵列）相比 BGA 更具优势的核心原因在于？</div>
                 <ul class="options-list">
-                    <li class="option-item" data-value="A" onclick="checkAnswer('q3', 'A')">A. 焊料柱的电阻率远低于焊料球</li>
-                    <li class="option-item" data-value="B" onclick="checkAnswer('q3', 'B')">B. 焊料柱更容易进行手工作业和目检</li>
-                    <li class="option-item" data-value="C" onclick="checkAnswer('q3', 'C')">C. 高纵横比的焊料柱具备更高的柔顺性，能有效释放由 CTE 错配引起的大剪切应力</li>
-                    <li class="option-item" data-value="D" onclick="checkAnswer('q3', 'D')">D. 焊料柱完全由纯铜制成，不会产生任何热疲劳损伤</li>
+                    <li class="option-item" data-value="A">A. 焊料柱的电阻率远低于焊料球</li>
+                    <li class="option-item" data-value="B">B. 焊料柱更容易进行手工作业和目检</li>
+                    <li class="option-item" data-value="C">C. 高纵横比的焊料柱具备更高的柔顺性，能有效释放由 CTE 错配引起的大剪切应力</li>
+                    <li class="option-item" data-value="D">D. 焊料柱完全由纯铜制成，不会产生任何热疲劳损伤</li>
                 </ul>
                 <div class="feedback"></div>
             </div>
@@ -145,10 +278,10 @@
             <div class="question-card" id="q4" data-answer="D">
                 <div class="question-title">Q4. LGA（触点阵列封装）最显著的结构特征及其在微处理器（如电脑CPU）中广泛应用的原因是？</div>
                 <ul class="options-list">
-                    <li class="option-item" data-value="A" onclick="checkAnswer('q4', 'A')">A. 底部具有极长的外露引脚，方便插入面包板</li>
-                    <li class="option-item" data-value="B" onclick="checkAnswer('q4', 'B')">B. 必须采用硬钎焊工艺与主板永久熔接</li>
-                    <li class="option-item" data-value="C" onclick="checkAnswer('q4', 'C')">C. 不需要考虑任何热量扇出路径</li>
-                    <li class="option-item" data-value="D" onclick="checkAnswer('q4', 'D')">D. 表面为平面阵列触点，通过专用插座（Socket）连接，安装高度低且更换维护方便</li>
+                    <li class="option-item" data-value="A">A. 底部具有极长的外露引脚，方便插入面包板</li>
+                    <li class="option-item" data-value="B">B. 必须采用硬钎焊工艺与主板永久熔接</li>
+                    <li class="option-item" data-value="C">C. 不需要考虑任何热量扇出路径</li>
+                    <li class="option-item" data-value="D">D. 表面为平面阵列触点，通过专用插座（Socket）连接，安装高度低且更换维护方便</li>
                 </ul>
                 <div class="feedback"></div>
             </div>
@@ -156,10 +289,10 @@
             <div class="question-card" id="q5" data-answer="B">
                 <div class="question-title">Q5. 在典型的 BGA 封装工艺流程中，关于置球、回流焊与点胶下填料（Underfill）的时序关系，叙述正确的是？</div>
                 <ul class="options-list">
-                    <li class="option-item" data-value="A" onclick="checkAnswer('q5', 'A')">A. 先进行下填料点胶固化，然后通过激光在胶层打孔进行置球</li>
-                    <li class="option-item" data-value="B" onclick="checkAnswer('q5', 'B')">B. 基板上喷涂助焊剂并精确置球，通过回流焊接形成固定焊点后，再在芯片贴装于PCB后进行毛细管下填料充填</li>
-                    <li class="option-item" data-value="C" onclick="checkAnswer('q5', 'C')">C. 置球与回流焊是在 PCB 板级装配全部完成后，作为最后一道质检工序进行的</li>
-                    <li class="option-item" data-value="D" onclick="checkAnswer('q5', 'D')">D. 近共晶焊料本身不需要经历回流焊，直接依靠下填料的粘性固定在衬垫上</li>
+                    <li class="option-item" data-value="A">A. 先进行下填料点胶固化，然后通过激光在胶层打孔进行置球</li>
+                    <li class="option-item" data-value="B">B. 基板上喷涂助焊剂并精确置球，通过回流焊接形成固定焊点后，再在芯片贴装于PCB后进行毛细管下填料充填</li>
+                    <li class="option-item" data-value="C">C. 置球与回流焊是在 PCB 板级装配全部完成后，作为最后一道质检工序进行的</li>
+                    <li class="option-item" data-value="D">D. 近共晶焊料本身不需要经历回流焊，直接依靠下填料的粘性固定在衬垫上</li>
                 </ul>
                 <div class="feedback"></div>
             </div>
@@ -167,10 +300,10 @@
             <div class="question-card" id="q6" data-answer="A">
                 <div class="question-title">Q6. 在 Sn-Pb 或无铅焊料与铜衬垫的界面处，回流焊会不可避免地生成金属间化合物（IMC）。关于 IMC 的性质，以下描述错误的是？</div>
                 <ul class="options-list">
-                    <li class="option-item" data-value="A" onclick="checkAnswer('q6', 'A')">A. IMC 具有极高的延展性和韧性，是缓冲封装外部机械冲击的核心柔性层</li>
-                    <li class="option-item" data-value="B" onclick="checkAnswer('q6', 'B')">B. 常见的常温生成物主要包括 Cu6Sn5（η相）和紧靠 Cu 衬垫基底的 Cu3Sn（ε相）</li>
-                    <li class="option-item" data-value="C" onclick="checkAnswer('q6', 'C')">C. IMC 本质上呈现硬脆性，过厚的 IMC 往往伴随高的本征应力，是焊点发生脆性断裂的隐患点</li>
-                    <li class="option-item" data-value="D" onclick="checkAnswer('q6', 'D')">D. 在长期的热老化环境中，IMC 会持续由于固态扩散而变厚</li>
+                    <li class="option-item" data-value="A">A. IMC 具有极高的延展性和韧性，是缓冲封装外部机械冲击的核心柔性层</li>
+                    <li class="option-item" data-value="B">B. 常见的常温生成物主要包括 Cu6Sn5（η相）和紧靠 Cu 衬垫基底的 Cu3Sn（ε相）</li>
+                    <li class="option-item" data-value="C">C. IMC 本质上呈现硬脆性，过厚的 IMC 往往伴随高的本征应力，是焊点发生脆性断裂的隐患点</li>
+                    <li class="option-item" data-value="D">D. 在长期的热老化环境中，IMC 会持续由于固态扩散而变厚</li>
                 </ul>
                 <div class="feedback"></div>
             </div>
@@ -178,10 +311,10 @@
             <div class="question-card" id="q7" data-answer="C">
                 <div class="question-title">Q7. 文档中提到，在界面化学反应和长期热老化进程中，由于 Cu 原子向 Sn 中扩散的通量大于 Sn 向 Cu 扩散的通量，在 Cu3Sn 与 Cu 衬垫界面极易萌生什么缺陷，导致界面强度急剧退化？</div>
                 <ul class="options-list">
-                    <li class="option-item" data-value="A" onclick="checkAnswer('q7', 'A')">A. 树枝状晶体偏析（Dendrites）</li>
-                    <li class="option-item" data-value="B" onclick="checkAnswer('q7', 'B')">B. 富Pb（铅）相严重聚集</li>
-                    <li class="option-item" data-value="C" onclick="checkAnswer('q7', 'C')">C. 柯肯达尔空洞（Kirkendall Voids）</li>
-                    <li class="option-item" data-value="D" onclick="checkAnswer('q7', 'D')">D. 应力诱发晶格位错位移</li>
+                    <li class="option-item" data-value="A">A. 树枝状晶体偏析（Dendrites）</li>
+                    <li class="option-item" data-value="B">B. 富Pb（铅）相严重聚集</li>
+                    <li class="option-item" data-value="C">C. 柯肯达尔空洞（Kirkendall Voids）</li>
+                    <li class="option-item" data-value="D">D. 应力诱发晶格位错位移</li>
                 </ul>
                 <div class="feedback"></div>
             </div>
@@ -189,24 +322,24 @@
             <div class="question-card" id="q8" data-answer="D">
                 <div class="question-title">Q8. 在热循环（Temperature Cycling）载荷作用下，阵列封装焊点萌生热疲劳开裂的最底层物理驱动力是？</div>
                 <ul class="options-list">
-                    <li class="option-item" data-value="A" onclick="checkAnswer('q8', 'A')">A. 塑封胶在高温下吸水发生水解膨胀</li>
-                    <li class="option-item" data-value="B" onclick="checkAnswer('q8', 'B')">B. 铜衬垫与金引线发生电化学电位差腐蚀</li>
-                    <li class="option-item" data-value="C" onclick="checkAnswer('q8', 'C')">C. 焊料在低温下发生由面心立方向体心立方的相变</li>
-                    <li class="option-item" data-value="D" onclick="checkAnswer('q8', 'D')">D. 芯片、封装基板与 PCB 之间存在热膨胀系数（CTE）错配，在温变下产生周期性剪切应变</li>
+                    <li class="option-item" data-value="A">A. 塑封胶在高温下吸水发生水解膨胀</li>
+                    <li class="option-item" data-value="B">B. 铜衬垫与金引线发生电化学电位差腐蚀</li>
+                    <li class="option-item" data-value="C">C. 焊料在低温下发生由面心立方向体心立方的相变</li>
+                    <li class="option-item" data-value="D">D. 芯片、封装基板与 PCB 之间存在热膨胀系数（CTE）错配，在温变下产生周期性剪切应变</li>
                 </ul>
                 <div class="feedback"></div>
             </div>
-
         </form>
-        <button type="button" onclick="resetQuiz()">清空所有答题纪录</button>
+        <button type="button" class="reset-btn" id="btnReset">清空所有答题纪录</button>
     </div>
 </div>
 
 <script>
+    // 学术基础数据
     const textData = {
         bga: {
             title: "🔮 BGA (球栅阵列) 结构与显微特征：",
-            desc: "<strong>核心机制：</strong>底部由二维阵列焊料球提供电互连与热路径。<br><strong>工程优势：</strong>引脚总数与面积成正比。回流焊时熔融焊料的表面张力可带来优异的<strong>自对准效应</strong>。<br><strong>可靠性痛点：</strong>由于基板与PCB热膨胀系数（CTE）不匹配，在温度循环下焊料球会承受巨大的疲劳剪切应力，边缘焊点易率先开裂。"
+            desc: "<strong>核心机制：</strong>底部由二维阵列焊料球提供电互连与热路径。<br><strong>工程优势：</strong>引脚总数与面积成正比。回流焊时熔融焊料的表面张力可带来优异的<strong>自对准效应</strong>。<br><strong>可靠性痛点：</strong>由于基板与 PCB 热膨胀系数（CTE）不匹配，在温度循环下焊料球会承受巨大的疲劳剪切应力，边缘焊点易率先开裂。"
         },
         cga: {
             title: "💈 CGA (圆柱阵列) 结构与显微特征：",
@@ -214,38 +347,280 @@
         },
         lga: {
             title: "🔲 LGA (触点阵列) 结构与显微特征：",
-            desc: "<strong>核心机制：</strong>封装底部不预制焊球，而是制作一层扁平的金属点阵。它不焊死在PCB上，需要配合高精度的<strong>连接器/插座（Socket）</strong>利用机械压力紧压接触。<br><strong>工程优势：</strong>① 整体安装高度显着降低；② 信号路径极短，电学高速完整性极佳；③ <strong>维护极其便捷</strong>，CPU 升级或烧毁时可直接从 Socket 里更换。<br><strong>可靠性痛点：</strong>依靠接触触点机械压接，长期使用存在弹簧弹力退化、接触电阻因氧化而增大，或因振动导致瞬断的隐患。"
+            desc: "<strong>核心机制：</strong>封装底部不预制焊球，而是制作一层扁平的金属点阵。它不焊死在 PCB 上，需要配合高精度的<strong>连接器/插座（Socket）</strong>利用机械压力紧压接触。<br><strong>工程优势：</strong>① 整体安装高度显著降低；② 信号路径极短，电学高速完整性（SI/PI）极佳；③ <strong>维护极其便捷</strong>，CPU 升级或烧毁时可直接从 Socket 里更换。<br><strong>可靠性痛点：</strong>依靠接触触点机械压接，长期使用存在弹簧弹力退化、接触电阻因氧化而增大，或因振动导致瞬断的隐患。"
         }
     };
+
+    // 雷达图的核心五维动态量化数据
+    const radarMetrics = {
+        bga: { scores: [0.9, 0.7, 0.75, 0.5, 0.2], desc: "BGA 指标均衡，I/O 密度极高，但在极端恶劣温变下的板级可靠性受制于机械剪切应力。" },
+        cga: { scores: [0.7, 0.6, 0.45, 0.95, 0.3], desc: "CGA 在高应力恶劣环境下可靠性达到顶峰，但其高细长柱体带来的寄生电感限制了超高速信号表现。" },
+        lga: { scores: [0.85, 0.8, 0.95, 0.4, 0.98], desc: "LGA 电学高速性能（SI/PI）称霸，且可维护性达 100%，但高度依赖弹性插座（Socket）稳定的机械压紧力。" }
+    };
+
+    const radarLabels = ["I/O密度", "散热能效", "高速SI/PI", "板级可靠性", "可维护性"];
 
     const explanations = {
         q1: { A: "❌ A错：引线框架断裂多见于传统 SOP/DIP 封装的弯折处。", B: "🎉 B对：数量多必然导致引脚间距逼近制造极限，板级焊接时极易短路（桥连）。", C: "❌ C错：引线过长会增大引线电感，但非几何制造限制。", D: "❌ D错：“爆米花”效应属于吸湿后的共性失效。" },
         q2: { A: "🎉 A对：熔融焊料的表面张力倾向于使液态表面积最小化，从而将歪斜的芯片拉回至焊盘中心。", B: "❌ B错：下填料工艺在回流焊彻底完成后进行。", C: "❌ C错：完全虚构的词汇。", D: "❌ D错：助焊剂气流通常会导致元件产生偏移而非对准。" },
         q3: { A: "❌ A错：材质基本相近，电阻率没有本质差异。", B: "❌ B错：CGA 目检和手工作业难度极高，必须依赖 X-Ray 检测。", C: "🎉 C对：高纵横比（细长）的焊料柱具备极佳的柔顺性，能通过自身微小弯曲变形缓冲吸收剪切应力。", D: "❌ D错：长期热交变载荷下依旧存在热疲劳损伤，只是寿命大幅延长。" },
         q4: { A: "❌ A错：LGA 表面是完全平面的金属衬垫，无法插入面包板。", B: "❌ B错：LGA 最大的优势就是通过 Socket 压接实现“非永久连接”。", C: "❌ C错：高端 CPU 功耗极高，必须极其严苛地考虑热量扇出。", D: "🎉 D对：配合弹性插座（Socket）机械压紧，去掉了焊球高度，更换维护方便且高频电学寄生效应小。" },
-        q5: { A: "❌ A错：下填料流体一旦固化无法在此状态下进行置球与冶金回流焊。", B: "🎉 B对：工业顺序：基板喷涂助焊剂 → 精确置球 → 一次回流焊制成BGA器件 → 贴装到PCB上二次回流焊接 → 进行毛细管下填料充填并加热固化。", C: "❌ C错：置球是 BGA 器件出厂前在封装厂就完成的工序。", D: "❌ D错：必须经历高温回流焊阶段建立真正的冶金结合（IMC层）。" },
-        q6: { A: "🎉 A对（选错误项）：IMC 本质上是非常硬且脆的金属间化合物。过厚时在受到外部机械冲击时最易成为裂纹萌生源，绝对不是缓冲柔性层。", B: "❌ B错（陈述正确）：靠近铜基底的是 ε 相 (Cu3Sn)，靠焊料侧的是 η 相 (Cu6Sn5)。", C: "❌ C错（陈述正确）：过厚意味着脆性增加并伴随高本征内应力。", D: "❌ D错（陈述正确）：在服役和长期高温老化中，厚度表现为时间平方根的增长规律。" },
-        q7: { A: "❌ A错：树枝状晶体偏析是在焊料由液态向固态结晶冷却过程中产生的。", B: "❌ B错：该缺陷与 Pb 无关。", C: "🎉 C对：由于 Cu 原子向锡侧扩散速率远大于 Sn 向铜侧的速率，引发质量不对称净转移，在 Cu3Sn 界面层内遗留微观空位，聚集后形成柯肯达尔空洞。", D: "❌ D错：不属于位错滑移范畴。" },
-        q8: { A: "❌ A错：爆米花效应属于瞬间高温（如再次过回流焊）时发生的失效。", B: "❌ B错：底层主驱动力是机械应力而非电化学腐蚀。", C: "❌ C错：常规温变循环内不涉及破坏性的晶格大相变。", B: "❌ B错：底线驱动力非电化学。", D: "🎉 D对：由于硅芯片、封装基板以及 PCB 主板之间的热膨胀系数（CTE）严重不匹配，温变下产生周期性剪切应变导致热疲劳裂纹。" }
+        q5: { A: "❌ A错：下填料流体一旦固化无法在此状态下进行置球与冶金回流焊。", B: "🎉 B对：工业顺序：基板喷涂助焊剂 → 精确置球 → 一次回流焊制成 BGA 器件 → 贴装到 PCB 上二次回流焊接 → 进行毛细管下填料充填并加热固化。", C: "❌ C错：置球是 BGA 器件出厂前在封装厂就完成的工序。", D: "❌ D错：必须经历高温回流焊阶段建立真正的冶金结合（IMC层）。" },
+        q6: { A: "🎉 A对（选错误项）：IMC 本质上是非常硬且脆的金属间化合物。过厚时在受到外部机械冲击时最易成为裂纹萌生源，绝对不是缓冲柔性层。", B: "❌ B错（陈述正确）：靠近铜基底的是 ε 相 ($\text{Cu}_3\text{Sn}$)，靠焊料侧的是 η 相 ($\text{Cu}_6\text{Sn}_5$)。", C: "❌ C错（陈述正确）：过厚意味着脆性增加并伴随高本征内应力。", D: "❌ D错（陈述正确）：在服役和长期高温老化中，厚度表现为时间平方根的增长规律。" },
+        q7: { A: "❌ A错：树枝状晶体偏析是在焊料由液态向固态结晶冷却过程中产生的。", B: "❌ B错：该缺陷与 Pb 无关。", C: "🎉 C对：由于 Cu 原子向锡侧扩散速率远大于 Sn 向铜侧的速率，引发质量不对称净转移，在 $\text{Cu}_3\text{Sn}$ 界面层内遗留微观空位，聚集后形成柯肯达尔空洞。", D: "❌ D错：不属于位错滑移范畴。" },
+        q8: { A: "❌ A错：爆米花效应属于瞬间高温（如再次过回流焊）时发生的失效。", B: "❌ B错：底层主驱动力是机械应力而非电化学腐蚀。", C: "❌ C错：常规温变循环内不涉及破坏性的晶格大相变。", D: "🎉 D对：由于硅芯片、封装基板以及 PCB 主板之间的热膨胀系数（CTE）严重不匹配，温变下产生周期性剪切应变导致热疲劳裂纹。" }
     };
 
-    function explore(type) {
-        const box = document.getElementById('exploreDetailBox');
-        box.style.display = 'block';
+    let currentRadarType = 'bga';
 
+    document.addEventListener("DOMContentLoaded", () => {
+        // 绑定卡片切换
+        document.querySelectorAll('.structure-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const type = card.getAttribute('data-type');
+                switchExplore(type);
+            });
+        });
+
+        // 绑定答题触发
+        document.querySelectorAll('.question-card').forEach(card => {
+            const qId = card.id;
+            card.querySelectorAll('.option-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const userValue = item.getAttribute('data-value');
+                    checkAnswer(qId, userValue);
+                });
+            });
+        });
+
+        // 绑定事件滑块和评估按钮
+        document.getElementById('tempSlider').addEventListener('input', runCteSimulation);
+        document.getElementById('imcSlider').addEventListener('input', runImcEvolution);
+        document.getElementById('btnFA').addEventListener('click', evaluateFA);
+        document.getElementById('btnDesign').addEventListener('click', evaluateDesign);
+        document.getElementById('btnReset').addEventListener('click', resetQuiz);
+
+        // 默认初始化
+        switchExplore('bga');
+        runCteSimulation();
+        initRadarCanvas();
+    });
+
+    // 彻底修复：用 HTML5 Canvas 纯前端实现数据驱动的“真雷达图”绘制引擎
+    function drawRadarChart(type) {
+        const canvas = document.getElementById('radarCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = 80;
+        const totalSides = 5;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. 绘制蜘蛛网背景底图
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        for (let j = 1; j <= 4; j++) {
+            const r = radius * (j / 4);
+            ctx.beginPath();
+            for (let i = 0; i < totalSides; i++) {
+                const angle = (i * 2 * Math.PI / totalSides) - Math.PI / 2;
+                const x = centerX + r * Math.cos(angle);
+                const y = centerY + r * Math.sin(angle);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        // 2. 绘制五维坐标轴轴引线
+        ctx.beginPath();
+        for (let i = 0; i < totalSides; i++) {
+            const angle = (i * 2 * Math.PI / totalSides) - Math.PI / 2;
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
+        }
+        ctx.stroke();
+
+        // 3. 绘制文字文本标签
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = '#64748b';
+        ctx.textAlign = 'center';
+        for (let i = 0; i < totalSides; i++) {
+            const angle = (i * 2 * Math.PI / totalSides) - Math.PI / 2;
+            const textX = centerX + (radius + 22) * Math.cos(angle);
+            let textY = centerY + (radius + 14) * Math.sin(angle);
+            if (i === 0) textY -= 5; 
+            ctx.fillText(radarLabels[i], textX, textY);
+        }
+
+        // 4. 根据当前封装类型，动态提取数据并绘制数据层多边形
+        const scores = radarMetrics[type].scores;
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.35)';
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < totalSides; i++) {
+            const angle = (i * 2 * Math.PI / totalSides) - Math.PI / 2;
+            const currentRadius = radius * scores[i];
+            const x = centerX + currentRadius * Math.cos(angle);
+            const y = centerY + currentRadius * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 5. 绘制各个数据特征顶点小圆点
+        ctx.fillStyle = '#1e3a8a';
+        for (let i = 0; i < totalSides; i++) {
+            const angle = (i * 2 * Math.PI / totalSides) - Math.PI / 2;
+            const currentRadius = radius * scores[i];
+            ctx.beginPath();
+            ctx.arc(centerX + currentRadius * Math.cos(angle), centerY + currentRadius * Math.sin(angle), 3.5, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    }
+
+    function initRadarCanvas() {
+        drawRadarChart(currentRadarType);
+    }
+
+    // 联动控制切换
+    function switchExplore(type) {
+        currentRadarType = type;
+        document.getElementById('exploreDetailBox').style.display = 'block';
         document.querySelectorAll('.structure-card').forEach(c => c.classList.remove('active'));
         document.getElementById(`card-${type}`).classList.add('active');
 
-        const textBox = document.getElementById('exploreText');
-        textBox.innerHTML = `<strong>${textData[type].title}</strong><br>${textData[type].desc}`;
-        
-        // 控制真实图片的显示与隐藏
+        document.getElementById('exploreText').innerHTML = `<strong>${textData[type].title}</strong><br>${textData[type].desc}`;
         document.querySelectorAll('.explore-img').forEach(img => img.style.display = 'none');
         document.getElementById(`img-${type}`).style.display = 'block';
+
+        // 触发雷达图 Canvas 数据重绘
+        drawRadarChart(type);
+        document.getElementById('radarDesc').innerText = radarMetrics[type].desc;
         
-        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // 确保新排版的 MathJax 能及时捕捉到文本块变更进行二次美化渲染
+        if (window.MathJax && window.MathJax.typeset) {
+            window.MathJax.typeset();
+        }
     }
 
+    // 动态模拟 ①: CTE 板级剪切变动
+    function runCteSimulation() {
+        const T = parseInt(document.getElementById('tempSlider').value);
+        document.getElementById('tempDisplay').innerText = `${T} °C`;
+        
+        const dT = T - 25;
+        const shiftX = dT * 0.25; 
+        
+        document.getElementById('simChip').style.transform = `translateX(calc(-50% - ${shiftX * 0.4}px))`;
+        // 正确运作：已经绑定了正确的 DOM 节点，不再报 null 异常
+        document.getElementById('simPCB').style.transform = `translateX(calc(-50% + ${shiftX * 0.6}px))`;
+        
+        const skewAngle = dT * 0.15;
+        const jointL = document.getElementById('jointL');
+        const jointR = document.getElementById('jointR');
+        
+        jointL.style.transform = `skewX(${skewAngle}deg)`;
+        jointR.style.transform = `skewX(${skewAngle}deg)`;
+
+        const crackLines = document.querySelectorAll('.crack-line');
+        const feedback = document.getElementById('simFeedback');
+        if (Math.abs(dT) > 75) {
+            crackLines.forEach(line => line.style.display = 'block');
+            jointL.style.background = '#f87171';
+            jointR.style.background = '#f87171';
+            feedback.innerHTML = `⚠️ <strong>工程开裂警报：</strong>热冲击温差 $\\Delta T = ${Math.abs(dT)}^\\circ\\text{C}$ 严重超标。由于 $\\alpha_{\\text{PCB}} \\gg \\alpha_{\\text{Chip}}$，外围焊点遭遇严重塑性剪切形变，萌生<strong>热疲劳微裂纹（Thermal Crack）</strong>！`;
+        } else {
+            crackLines.forEach(line => line.style.display = 'none');
+            jointL.style.background = '#cbd5e1';
+            jointR.style.background = '#cbd5e1';
+            feedback.innerHTML = `✨ 当前形变控制在材料弹性应变极限内，内部正在周期性积攒应力损伤。`;
+        }
+        if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
+    }
+
+    // 动态模拟 ⑤: IMC 层化生长和空洞分布
+    function runImcEvolution() {
+        const hours = parseInt(document.getElementById('imcSlider').value);
+        document.getElementById('imcDisplay').innerText = `${hours} h`;
+
+        const layer65 = document.getElementById('layerCu6Sn5');
+        const layer3 = document.getElementById('layerCu3Sn');
+        const imcText = document.getElementById('imcText');
+        const voids = document.querySelectorAll('.void-dots');
+
+        const h65 = Math.min(35, Math.sqrt(hours) * 1.1);
+        const h3 = Math.min(25, hours > 100 ? Math.sqrt(hours - 100) * 0.8 : 0);
+
+        layer65.style.height = `${h65}px`;
+        layer65.style.opacity = hours > 0 ? 1 : 0;
+        layer3.style.height = `${h3}px`;
+        layer3.style.opacity = hours > 120 ? 1 : 0;
+
+        if (hours === 0) {
+            voids.forEach(v => v.style.display = 'none');
+            imcText.innerHTML = `<strong>初始状态：</strong>回流焊前，焊料与铜衬垫边界分明，尚未发生高温冶金反应。`;
+        } else if (hours > 0 && hours <= 150) {
+            voids.forEach(v => v.style.display = 'none');
+            imcText.innerHTML = `<strong>一次回流焊阶段 (${hours}h)：</strong>铜衬垫与固/液态锡层发生界面化学反应，自发生成簇状的 <strong>$\\text{Cu}_6\\text{Sn}_5$ ($\eta$ 相)</strong>。结合稳固，厚度处于健康区间（$1\\sim2\\,\\mu\\text{m}$）。`;
+        } else if (hours > 150 && hours <= 600) {
+            imcText.innerHTML = `<strong>固态扩散老化阶段 (${hours}h)：</strong>由于 Cu 原子跨越界面持续向锡侧扩散，在 $\\text{Cu}_6\\text{Sn}_5$ 与 Cu 衬垫之间夹层孕育出了富铜的 <strong>$\\text{Cu}_3\\text{Sn}$ ($\\varepsilon$ 相)</strong>。金属间化合物总厚度超标，硬脆性质显现。`;
+            voids.forEach(v => v.style.display = 'none');
+        } else {
+            voids.forEach(v => v.style.display = 'block');
+            imcText.innerHTML = `<strong>极端热老化后期 (${hours}h)：</strong>因为铜原子向外扩散通量 $J_{\\text{Cu}}$ 远大于锡原子向内的扩散通量 $J_{\\text{Sn}}$，由于质量不对称净转移，在 $\\text{Cu}_3\\text{Sn}$ 与 Cu 接触面上萌生聚集了大量的 <strong>柯肯达尔空洞（Kirkendall Voids）</strong>！断裂韧性严重崩塌。`;
+        }
+        if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
+    }
+
+    function evaluateFA() {
+        const val = document.getElementById('faSelect').value;
+        const box = document.getElementById('faFeedback');
+        box.style.display = 'block';
+        if (val === 'hip') {
+            box.className = "alert-info";
+            box.style.backgroundColor = "#dcfce7";
+            box.style.color = "#14532d";
+            box.innerHTML = `🎉 <strong>完全正确！</strong> 这正是典型的<strong>枕头效应（Head-in-Pillow）</strong>。多由元器件在回流焊高温下发生动态翘曲，导致焊球与锡膏垫在熔融期分离、表面氧化无法融合，冷却曲率平复后仅形成像枕头般的机械虚接触。`;
+        } else if (val === "") {
+            box.style.display = 'none';
+        } else {
+            box.className = "alert-info";
+            box.style.backgroundColor = "#fee2e2";
+            box.style.color = "#7f1d1d";
+            box.innerHTML = `❌ <strong>断定错误。</strong>提示：样品表现为“接触分离但并未发生重熔冶金”，表明属于典型的工艺级虚焊失效，请修正结论。`;
+        }
+    }
+
+    function evaluateDesign() {
+        const val = document.getElementById('selectDesign').value;
+        const box = document.getElementById('designFeedback');
+        box.style.display = 'block';
+        if (val === 'CGA') {
+            box.className = "alert-info";
+            box.style.backgroundColor = "#dcfce7";
+            box.style.color = "#14532d";
+            box.innerHTML = `🎉 <strong>绝佳方案！</strong>在宇航级高可靠场景中，陶瓷基板与 FR-4 的大范围 $\\Delta T$ 循环会导致严重的 CTE 剪切应力。普通 BGA 极其脆弱极易崩裂；LGA 机械接触则易受强振动干扰瞬断。采用 <strong>CGA（CCGA）</strong> 封装，高纵横比焊料柱具有优异的柔顺性，是目前不可替代的核心技术。`;
+        } else if (val === "") {
+            box.style.display = 'none';
+        } else {
+            box.className = "alert-info";
+            box.style.backgroundColor = "#fee2e2";
+            box.style.color = "#7f1d1d";
+            box.innerHTML = `❌ <strong>方案存在早期失效隐患。</strong>提示：重点关注“航天级、剧烈温度循环、严禁返修”的刚性工程束缚，BGA 与接触式 LGA 极易因剪切剪断或应力疲劳而提前损坏。`;
+        }
+        if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
+    }
+
+    // 单题即点即评与深度选项剖析
     function checkAnswer(qId, userValue) {
         const card = document.getElementById(qId);
         if (card.classList.contains('locked')) return;
@@ -279,15 +654,26 @@
         }
         explanationHtml += `</ul>`;
         feedbackBox.innerHTML += explanationHtml;
+
+        if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
 
+    // 状态全局清空重置
     function resetQuiz() {
         document.getElementById('quizForm').reset();
         document.querySelectorAll('.question-card').forEach(card => card.classList.remove('locked'));
         document.querySelectorAll('.option-item').forEach(item => item.className = 'option-item');
         document.querySelectorAll('.feedback').forEach(f => f.style.display = 'none');
-        document.getElementById('exploreDetailBox').style.display = 'none';
-        document.querySelectorAll('.structure-card').forEach(c => c.classList.remove('active'));
+        document.getElementById('faFeedback').style.display = 'none';
+        document.getElementById('designFeedback').style.display = 'none';
+        document.getElementById('faSelect').value = "";
+        document.getElementById('selectDesign').value = "";
+        document.getElementById('tempSlider').value = 25;
+        document.getElementById('imcSlider').value = 0;
+        
+        runCteSimulation();
+        runImcEvolution();
+        switchExplore('bga');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
