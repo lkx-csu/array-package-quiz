@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9.3 阵列封装 交互式习题库</title>
+    <style>
+        body { font-family: 'PingFang SC', sans-serif; background-color: #f5f7fa; padding: 20px; color: #333; }
+        .quiz-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { color: #1e3a8a; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        .question { margin-bottom: 25px; }
+        .options-list { list-style: none; padding: 0; }
+        .option-item { padding: 12px; margin: 8px 0; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .option-item:hover { background-color: #f0fdf4; border-color: #10b981; }
+        .selected { background-color: #eff6ff; border-color: #3b82f6; font-weight: bold; }
+        button { background-color: #1e3a8a; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; }
+        button:hover { background-color: #172554; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 6px; display: none; line-height: 1.6; }
+        .correct { background-color: #dcfce7; color: #14532d; border: 1px solid #bbf7d0; }
+        .wrong { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h2>9.3 阵列封装 随堂练习</h2>
+    
+    <div class="question" id="q1">
+        <p><strong>Q1: 为什么当器件引脚数超过 200 个时，传统的四边外围引线封装（如 QFP）装配时容易发生短路？</strong></p>
+        <ul class="options-list">
+            <li class="option-item" onclick="selectOption(this, 'A')">A. 芯片内部发热量过大导致焊点熔化</li>
+            <li class="option-item" onclick="selectOption(this, 'B')">B. 外围引脚节距（Pitch）逼近制造极限，极易发生焊膏桥连</li>
+            <li class="option-item" onclick="selectOption(this, 'C')">C. 二维引脚阵列互连限制了信号传输速度</li>
+            <li class="option-item" onclick="selectOption(this, 'D')">D. 封装底部的二维互连端子产生了寄生电感</li>
+        </ul>
+    </div>
+
+    <button onclick="checkAnswer()">提交答案</button>
+
+    <div id="resultBox" class="result"></div>
+</div>
+
+<script>
+    let selectedAnswer = '';
+
+    function selectOption(element, val) {
+        // 清除其他选项的高亮
+        let items = element.parentElement.getElementsByClassName('option-item');
+        for(let item of items) { item.classList.remove('selected'); }
+        // 高亮当前选项
+        element.classList.add('selected');
+        selectedAnswer = val;
+    }
+
+    function checkAnswer() {
+        if (!selectedAnswer) { alert('请先选择一个选项！'); return; }
+        
+        const resultBox = document.getElementById('resultBox');
+        resultBox.style.display = 'block';
+        
+        if (selectedAnswer === 'B') {
+            resultBox.className = 'result correct';
+            resultBox.innerHTML = '<strong>🎉 回答正确！</strong><br>解析：正如文档所述，当器件引脚数超过200个时，外围引脚节距将逼近制造工艺极限，板级装配时极易发生焊膏桥连短路。而阵列封装（Area Array Package）正是为了突破这一外围引脚密度的几何限制。';
+        } else {
+            resultBox.className = 'result wrong';
+            resultBox.innerHTML = '<strong>❌ 回答错误。</strong>再想想看！提示：关注文档中关于“外围引脚节距（Pitch）”与“焊膏桥连”的描述。';
+        }
+    }
+</script>
+
+</body>
+</html>
