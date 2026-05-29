@@ -224,10 +224,29 @@
         .match-actions .interactive-btn { width: auto; min-width: 150px; }
         .match-actions .reset-btn { width: auto; min-width: 130px; padding: 10px 15px; font-size: 14px; border-radius: 6px; }
         .match-feedback { margin-top: 12px; padding: 12px; border-radius: 6px; font-size: 13px; display: none; }
+        /* 工艺流程排序模块 */
+        .process-board { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+        .process-lane { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; min-height: 360px; }
+        .process-lane-title { font-size: 13px; font-weight: 700; color: var(--primary-color); margin-bottom: 10px; }
+        .process-pool, .process-sequence { display: flex; flex-direction: column; gap: 9px; min-height: 285px; }
+        .process-sequence { border: 2px dashed #cbd5e1; border-radius: 8px; padding: 10px; background: white; }
+        .process-step { display: flex; align-items: flex-start; gap: 9px; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #334155; font-size: 13px; line-height: 1.45; cursor: grab; transition: all 0.15s ease; }
+        .process-step:hover { border-color: var(--secondary-color); box-shadow: 0 3px 10px rgba(30,58,138,0.12); transform: translateY(-1px); }
+        .process-step.dragging { opacity: 0.55; }
+        .process-step.selected { border-color: var(--secondary-color); background: #eff6ff; box-shadow: 0 0 0 2px rgba(59,130,246,0.14); }
+        .step-index { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: #dbeafe; color: #1e3a8a; font-size: 12px; font-weight: 800; }
+        .process-slot-hint { color: #94a3b8; font-size: 13px; text-align: center; padding: 18px 8px; border-radius: 6px; }
+        .process-sequence.drag-over { border-color: var(--secondary-color); background: #eff6ff; }
+        .process-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+        .process-actions .interactive-btn { width: auto; min-width: 150px; }
+        .process-actions .reset-btn { width: auto; min-width: 130px; padding: 10px 15px; font-size: 14px; border-radius: 6px; }
+        .process-feedback { margin-top: 12px; padding: 12px; border-radius: 6px; font-size: 13px; display: none; }
         @media (max-width: 760px) {
             .match-board { grid-template-columns: 1fr; }
             .failure-item { grid-template-columns: 1fr; }
             .match-actions .interactive-btn, .match-actions .reset-btn { width: 100%; }
+            .process-board { grid-template-columns: 1fr; }
+            .process-actions .interactive-btn, .process-actions .reset-btn { width: 100%; }
         }
         .reset-btn { background-color: #64748b; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: background 0.2s; }
         .reset-btn:hover { background-color: #475569; }
@@ -249,6 +268,10 @@
                 <div class="module-card-title">结构探析 & 数据雷达</div>
                 <div class="module-card-desc">切换 BGA、CGA、LGA，比较互连结构、可靠性、电学性能和可维护性。</div>
             </button>
+            <button class="module-card" data-target="page-process">
+                <div class="module-card-title">工艺流程排序</div>
+                <div class="module-card-desc">拖动排列 BGA 从置球、回流到 Underfill 固化的关键制造顺序。</div>
+            </button>
             <button class="module-card" data-target="page-cte">
                 <div class="module-card-title">CTE 失配演示</div>
                 <div class="module-card-desc">调节温度，观察热膨胀系数失配如何转化为板级焊点剪切应变。</div>
@@ -259,7 +282,7 @@
             </button>
             <button class="module-card" data-target="page-fa">
                 <div class="module-card-title">失效分析工程师模式</div>
-                <div class="module-card-desc">用三道对话式场景题训练诊断思路，从现象推断失效机理。</div>
+                <div class="module-card-desc">通过对话式场景训练诊断思路，从检测现象推断失效机理。</div>
             </button>
             <button class="module-card" data-target="page-design">
                 <div class="module-card-title">复杂场景封装选型挑战</div>
@@ -327,6 +350,39 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="page-process" class="section-card module-page page">
+        <div class="page-toolbar">
+            <button type="button" class="back-home-btn">返回首页</button>
+        </div>
+        <h3 class="section-title">🧭 BGA 工艺流程排序模块</h3>
+        <div class="knowledge-box">
+            <strong>知识点提示：</strong>BGA 的焊球互连不是“先有 Underfill 再焊接”，而是先通过助焊剂、置球和回流焊建立焊点，再完成板级贴装，最后进行毛细管 Underfill 填充与固化。
+            <ul>
+                <li>置球和一次回流主要发生在封装制造阶段。</li>
+                <li>贴装到 PCB 后通常还需要二次回流形成板级互连。</li>
+                <li>Underfill 位于焊点和 PCB 间隙，通常在板级焊接完成并清洁/检查后进行。</li>
+            </ul>
+        </div>
+        <p class="match-intro">把左侧步骤拖到右侧排序区，也可以点击左侧步骤依次加入右侧。完成后点击“判定流程顺序”。</p>
+        <div class="process-board">
+            <div class="process-lane">
+                <div class="process-lane-title">待排序工艺步骤</div>
+                <div class="process-pool" id="processPool"></div>
+            </div>
+            <div class="process-lane">
+                <div class="process-lane-title">你的工艺顺序</div>
+                <div class="process-sequence" id="processSequence" tabindex="0">
+                    <div class="process-slot-hint">拖入或点击左侧步骤开始排序</div>
+                </div>
+            </div>
+        </div>
+        <div class="process-actions">
+            <button type="button" class="interactive-btn" id="btnCheckProcess">判定流程顺序</button>
+            <button type="button" class="reset-btn" id="btnResetProcess">重置本题</button>
+        </div>
+        <div id="processFeedback" class="process-feedback"></div>
     </div>
 
     <div id="page-cte" class="section-card module-page page">
@@ -512,9 +568,6 @@
     <div id="page-match" class="section-card module-page page">
         <div class="page-toolbar">
             <button type="button" class="back-home-btn">返回首页</button>
-            <div class="page-toolbar-actions">
-                <button type="button" class="small-reset-btn" id="btnResetMatchTop">清空本页答题记录</button>
-            </div>
         </div>
         <h3 class="section-title">🧩 焊点失效模式配对小游戏</h3>
         <p class="match-intro">把右侧“成因 / 检测特征”拖到左侧对应失效现象旁；也可以先点选右侧卡片，再点左侧空槽完成配对。</p>
@@ -538,9 +591,6 @@
     <div id="page-quiz" class="section-card module-page page">
         <div class="page-toolbar">
             <button type="button" class="back-home-btn">返回首页</button>
-            <div class="page-toolbar-actions">
-                <button type="button" class="small-reset-btn" id="btnResetQuizTop">清空本页答题记录</button>
-            </div>
         </div>
         <h3 class="section-title">📝 随堂核心概念通关测试（选项即点即评）</h3>
         <form id="quizForm">
@@ -682,6 +732,16 @@
         { id: "open", name: "开路", cause: "焊球塌陷不足、焊盘污染、共面性差或裂纹贯穿，使互连未形成连续导电通路，电测表现为断路。" }
     ];
 
+    const processSteps = [
+        { id: "flux", text: "在封装基板焊盘上涂覆助焊剂" },
+        { id: "ball", text: "利用模板或置球设备精确放置焊料球" },
+        { id: "reflow1", text: "一次回流焊，使焊球与封装基板形成冶金结合" },
+        { id: "mount", text: "将 BGA 器件贴装到 PCB 焊盘上" },
+        { id: "reflow2", text: "二次回流焊，形成 BGA 与 PCB 的板级互连" },
+        { id: "inspect", text: "清洁并进行 X-Ray / 电测等板级检查" },
+        { id: "underfill", text: "毛细管 Underfill 填充焊球与 PCB 间隙并加热固化" }
+    ];
+
     let currentRadarType = 'bga';
     let selectedCauseCard = null;
 
@@ -717,6 +777,8 @@
         document.getElementById('tempSlider').addEventListener('input', runCteSimulation);
         document.getElementById('underfillCheckbox').addEventListener('change', runCteSimulation);
         document.getElementById('imcSlider').addEventListener('input', runImcEvolution);
+        document.getElementById('btnCheckProcess').addEventListener('click', checkProcessOrder);
+        document.getElementById('btnResetProcess').addEventListener('click', initProcessOrderGame);
         document.querySelectorAll('.dialogue-case .case-option-btn').forEach(button => {
             button.addEventListener('click', () => evaluateDialogueCase(button));
         });
@@ -727,14 +789,13 @@
         document.getElementById('btnResetDesign').addEventListener('click', resetDesignCases);
         document.getElementById('btnCheckMatch').addEventListener('click', checkFailureMatches);
         document.getElementById('btnResetMatch').addEventListener('click', resetFailureMatchGame);
-        document.getElementById('btnResetMatchTop').addEventListener('click', resetFailureMatchGame);
-        document.getElementById('btnResetQuizTop').addEventListener('click', resetQuiz);
         document.getElementById('btnReset').addEventListener('click', resetQuiz);
 
         // 默认初始化
         switchExplore('bga');
         runCteSimulation();
         initRadarCanvas();
+        initProcessOrderGame();
         initFailureMatchGame();
     });
 
@@ -1035,6 +1096,127 @@
             feedback.style.display = 'none';
             feedback.innerHTML = '';
         });
+    }
+
+    function initProcessOrderGame() {
+        const pool = document.getElementById('processPool');
+        const sequence = document.getElementById('processSequence');
+        const feedback = document.getElementById('processFeedback');
+        if (!pool || !sequence) return;
+
+        const shuffled = [...processSteps].sort((a, b) => b.text.localeCompare(a.text, 'zh-CN'));
+        pool.innerHTML = shuffled.map(step => renderProcessStep(step)).join('');
+        sequence.innerHTML = '<div class="process-slot-hint">拖入或点击左侧步骤开始排序</div>';
+        feedback.style.display = 'none';
+        feedback.innerHTML = '';
+        bindProcessStepEvents();
+        bindProcessSequenceEvents();
+    }
+
+    function renderProcessStep(step) {
+        return `<div class="process-step" draggable="true" data-step="${step.id}" tabindex="0"><span class="step-index">•</span><span>${step.text}</span></div>`;
+    }
+
+    function bindProcessStepEvents() {
+        document.querySelectorAll('.process-step').forEach(step => {
+            step.addEventListener('dragstart', event => {
+                event.dataTransfer.setData('text/plain', step.dataset.step);
+                step.classList.add('dragging');
+            });
+            step.addEventListener('dragend', () => step.classList.remove('dragging'));
+            step.addEventListener('click', () => moveProcessStepToSequence(step));
+            step.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    moveProcessStepToSequence(step);
+                }
+            });
+        });
+    }
+
+    function bindProcessSequenceEvents() {
+        const sequence = document.getElementById('processSequence');
+        sequence.addEventListener('dragover', event => {
+            event.preventDefault();
+            sequence.classList.add('drag-over');
+            const dragging = document.querySelector('.process-step.dragging');
+            if (!dragging) return;
+            const afterElement = getProcessDragAfterElement(sequence, event.clientY);
+            if (afterElement == null) sequence.appendChild(dragging);
+            else sequence.insertBefore(dragging, afterElement);
+            updateProcessHint();
+            updateProcessNumbers();
+        });
+        sequence.addEventListener('dragleave', () => sequence.classList.remove('drag-over'));
+        sequence.addEventListener('drop', event => {
+            event.preventDefault();
+            sequence.classList.remove('drag-over');
+            updateProcessNumbers();
+            hideProcessFeedback();
+        });
+    }
+
+    function getProcessDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.process-step:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) return { offset, element: child };
+            return closest;
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function moveProcessStepToSequence(step) {
+        const sequence = document.getElementById('processSequence');
+        if (!step || step.parentElement === sequence) return;
+        sequence.appendChild(step);
+        updateProcessHint();
+        updateProcessNumbers();
+        hideProcessFeedback();
+    }
+
+    function updateProcessHint() {
+        const sequence = document.getElementById('processSequence');
+        const hint = sequence.querySelector('.process-slot-hint');
+        if (hint) hint.remove();
+    }
+
+    function updateProcessNumbers() {
+        document.querySelectorAll('#processSequence .process-step').forEach((step, index) => {
+            step.querySelector('.step-index').textContent = index + 1;
+        });
+        document.querySelectorAll('#processPool .process-step .step-index').forEach(indexEl => {
+            indexEl.textContent = '•';
+        });
+    }
+
+    function hideProcessFeedback() {
+        document.getElementById('processFeedback').style.display = 'none';
+    }
+
+    function checkProcessOrder() {
+        const selected = [...document.querySelectorAll('#processSequence .process-step')].map(step => step.dataset.step);
+        const expected = processSteps.map(step => step.id);
+        const feedback = document.getElementById('processFeedback');
+
+        feedback.style.display = 'block';
+        if (selected.length < expected.length) {
+            feedback.style.backgroundColor = '#fef3c7';
+            feedback.style.color = '#78350f';
+            feedback.innerHTML = `还差 ${expected.length - selected.length} 个步骤没有放入排序区。`;
+            return;
+        }
+
+        const correctCount = selected.filter((id, index) => id === expected[index]).length;
+        if (correctCount === expected.length) {
+            feedback.style.backgroundColor = '#dcfce7';
+            feedback.style.color = '#14532d';
+            feedback.innerHTML = '🎉 顺序正确！你已经掌握了 BGA 从封装置球到板级 Underfill 固化的关键工艺链。';
+        } else {
+            feedback.style.backgroundColor = '#fee2e2';
+            feedback.style.color = '#7f1d1d';
+            feedback.innerHTML = `当前有 ${correctCount}/${expected.length} 个位置正确。提示：先在封装基板上置球并一次回流，再贴装到 PCB 二次回流，最后进行 Underfill 填充与固化。`;
+        }
     }
 
     function initFailureMatchGame() {
