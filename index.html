@@ -32,6 +32,37 @@
         header h1 { margin: 0; font-size: 30px; letter-spacing: 1px; }
         header p { margin: 10px 0 0; opacity: 0.9; font-size: 15px; }
         
+        .page { display: none; }
+        .page.active { display: block; }
+        .home-page { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .home-intro { color: #64748b; font-size: 14px; margin: -6px 0 20px; }
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+        .module-card { text-align: left; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s ease; color: var(--text-color); }
+        .module-card:hover { border-color: var(--secondary-color); background: #eff6ff; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(30,58,138,0.12); }
+        .module-card-title { color: var(--primary-color); font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+        .module-card-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
+        .page-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .page-toolbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .back-home-btn, .small-reset-btn { border: none; border-radius: 6px; padding: 8px 12px; font-weight: 700; cursor: pointer; transition: background 0.2s ease; }
+        .back-home-btn { background: #e0f2fe; color: #075985; }
+        .back-home-btn:hover { background: #bae6fd; }
+        .small-reset-btn { background: #e2e8f0; color: #334155; }
+        .small-reset-btn:hover { background: #cbd5e1; }
+        .knowledge-box { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid var(--secondary-color); border-radius: 8px; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; color: #475569; }
+        .knowledge-box strong { color: #1e293b; }
+        .knowledge-box ul { margin: 8px 0 0 18px; padding: 0; }
+        .knowledge-box li { margin-bottom: 4px; }
+        .dialogue-case, .design-case { border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px; background: #f8fafc; }
+        .case-label { display: inline-block; font-size: 12px; font-weight: 700; color: white; background: var(--primary-color); border-radius: 999px; padding: 2px 9px; margin-bottom: 8px; }
+        .dialogue-bubble { border-radius: 8px; padding: 10px 12px; margin: 8px 0; font-size: 13px; line-height: 1.55; }
+        .dialogue-bubble.teacher { background: #eff6ff; color: #1e3a8a; }
+        .dialogue-bubble.student { background: white; border: 1px solid #cbd5e1; color: #334155; }
+        .case-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 10px; }
+        .case-option-btn { background: white; border: 1px solid #cbd5e1; color: #334155; border-radius: 6px; padding: 9px 10px; cursor: pointer; text-align: left; font-size: 13px; transition: all 0.2s ease; }
+        .case-option-btn:hover { border-color: var(--secondary-color); background: #eff6ff; }
+        .case-option-btn.correct-choice { background: #dcfce7; border-color: var(--success-color); color: #14532d; font-weight: 700; }
+        .case-option-btn.wrong-choice { background: #fee2e2; border-color: var(--error-color); color: #7f1d1d; }
+        .case-feedback { display: none; margin-top: 10px; border-radius: 6px; padding: 10px 12px; font-size: 13px; }
         .section-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0; }
         .section-title { color: var(--primary-color); border-left: 5px solid var(--secondary-color); padding-left: 12px; font-size: 20px; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
         
@@ -210,7 +241,45 @@
         <p>电子教材配套微电子封装技术互动平台</p>
     </header>
 
-    <div class="section-card">
+    <div id="homePage" class="home-page page active">
+        <h3 class="section-title">阵列封装互动模块导航</h3>
+        <p class="home-intro">选择一个知识点进入独立练习页面。每个模块都可以返回首页；答题类模块提供清空记录功能，方便课堂反复演示。</p>
+        <div class="module-grid">
+            <button class="module-card" data-target="page-explore">
+                <div class="module-card-title">结构探析 & 数据雷达</div>
+                <div class="module-card-desc">切换 BGA、CGA、LGA，比较互连结构、可靠性、电学性能和可维护性。</div>
+            </button>
+            <button class="module-card" data-target="page-cte">
+                <div class="module-card-title">CTE 失配演示</div>
+                <div class="module-card-desc">调节温度，观察热膨胀系数失配如何转化为板级焊点剪切应变。</div>
+            </button>
+            <button class="module-card" data-target="page-imc">
+                <div class="module-card-title">IMC 与空洞演化轴</div>
+                <div class="module-card-desc">通过时效滑块理解 Cu-Sn 界面反应、IMC 增厚与 Kirkendall 空洞。</div>
+            </button>
+            <button class="module-card" data-target="page-fa">
+                <div class="module-card-title">失效分析工程师模式</div>
+                <div class="module-card-desc">用三道对话式场景题训练诊断思路，从现象推断失效机理。</div>
+            </button>
+            <button class="module-card" data-target="page-design">
+                <div class="module-card-title">复杂场景封装选型挑战</div>
+                <div class="module-card-desc">面对航天、服务器等工程约束，选择更合适的阵列封装方案。</div>
+            </button>
+            <button class="module-card" data-target="page-match">
+                <div class="module-card-title">焊点失效模式匹配小游戏</div>
+                <div class="module-card-desc">把失效现象与成因/检测特征配对，区分工艺、材料和热机械失效。</div>
+            </button>
+            <button class="module-card" data-target="page-quiz">
+                <div class="module-card-title">随堂核心概念通关测试</div>
+                <div class="module-card-desc">完成核心概念选择题，即点即评并查看逐项解析。</div>
+            </button>
+        </div>
+    </div>
+
+    <div id="page-explore" class="section-card module-page page">
+        <div class="page-toolbar">
+            <button type="button" class="back-home-btn">返回首页</button>
+        </div>
         <h3 class="section-title">💡 互连结构探索 & 动态数据雷达</h3>
         
         <div class="explore-grid">
@@ -260,8 +329,19 @@
         </div>
     </div>
 
-    <div class="section-card">
+    <div id="page-cte" class="section-card module-page page">
+        <div class="page-toolbar">
+            <button type="button" class="back-home-btn">返回首页</button>
+        </div>
         <h3 class="section-title">⏳ 热循环板级应变模拟器（CTE 失配演示）</h3>
+        <div class="knowledge-box">
+            <strong>知识点提示：</strong>CTE（Coefficient of Thermal Expansion，热膨胀系数）不同的材料在同一温度变化下会产生不同的尺寸变化。阵列封装中，Si 芯片、封装基板和 FR-4 PCB 的膨胀量不同，焊点会被迫承担剪切形变。
+            <ul>
+                <li>温度变化越剧烈，$\Delta T$ 越大，焊点循环应变越明显。</li>
+                <li>距离封装中性点越远，DNP 越大，角焊点更容易先开裂。</li>
+                <li>Underfill 可以分散局部应力，但也会改变结构刚度与返修难度。</li>
+            </ul>
+        </div>
         <p style="font-size: 14px; color: #64748b; margin-top:-10px;">调节服役环境温度，由于芯片、封装基板与 PCB 的 CTE 错配，观察应变公式 $\gamma \propto (\alpha_{\text{PCB}} - \alpha_{\text{pkg}}) \cdot \Delta T \cdot \text{DNP}$ 的实际映射表现：</p>
         <div class="sim-container">
             <div class="cte-visual">
@@ -308,8 +388,19 @@
         </div>
     </div>
 
-    <div class="section-card">
+    <div id="page-imc" class="section-card module-page page">
+        <div class="page-toolbar">
+            <button type="button" class="back-home-btn">返回首页</button>
+        </div>
         <h3 class="section-title">🔬 界面 IMC 金属间化合物与空洞演化轴</h3>
+        <div class="knowledge-box">
+            <strong>知识点提示：</strong>IMC 是焊料与金属焊盘之间发生界面反应后形成的金属间化合物层。适度 IMC 是冶金结合的证据，但过厚 IMC 往往硬而脆，会成为裂纹和空洞聚集的薄弱区。
+            <ul>
+                <li>靠近焊料侧常见 $\text{Cu}_6\text{Sn}_5$，靠近 Cu 侧常见 $\text{Cu}_3\text{Sn}$。</li>
+                <li>长期热老化会使 IMC 按扩散控制规律继续增厚。</li>
+                <li>Cu/Sn 扩散通量不对称时，界面容易形成 Kirkendall 空洞。</li>
+            </ul>
+        </div>
         <p style="font-size: 14px; color: #64748b; margin-top:-10px;">移动时效时间滑块，观察回流焊及热老化过程中，钎料与 Cu 衬垫界面 IMC 厚度激增以及空洞的形成：</p>
         <div class="imc-stage-flex">
             <div class="imc-diagram">
@@ -335,35 +426,96 @@
         </div>
     </div>
 
-    <div class="grid-2col">
-        <div class="section-card">
-            <h3 class="section-title">🔍 失效分析工程师模式</h3>
-            <p style="font-size:13px; color:#64748b;">工厂送检来一批受热循环破坏的 BGA 样品，在 X-Ray / SEM 下观察到焊料球与衬垫发生分离但未完全熔合，呈现“枕头叠放”状，这属于什么典型失效？</p>
-            <select id="faSelect" class="select-input">
-                <option value="">-- 请选择断定结论 --</option>
-                <option value="void">界面柯肯达尔空洞 (Kirkendall Voiding)</option>
-                <option value="hip">枕头效应 (Head-in-Pillow, HIP)</option>
-                <option value="crack">应力集中导致的热疲劳开裂 (Thermal Crack)</option>
-            </select>
-            <button class="interactive-btn" id="btnFA">提交诊断结论</button>
-            <div id="faFeedback" class="alert-info"></div>
+    <div id="page-fa" class="section-card module-page page">
+        <div class="page-toolbar">
+            <button type="button" class="back-home-btn">返回首页</button>
+            <div class="page-toolbar-actions">
+                <button type="button" class="small-reset-btn" id="btnResetFA">清空本页答题记录</button>
+            </div>
+        </div>
+        <h3 class="section-title">🔍 失效分析工程师模式</h3>
+        <p style="font-size:13px; color:#64748b;">下面三道题采用“工程师对话”的方式：先读检测现象，再选择你会给出的诊断结论。</p>
+
+        <div class="dialogue-case" data-case="fa1" data-answer="hip">
+            <span class="case-label">场景 1</span>
+            <div class="dialogue-bubble teacher"><strong>质检工程师：</strong>X-Ray 看不出明显桥连，但切片后发现焊球与锡膏垫曾经分离，冷却后像两个枕头贴在一起，并没有完全冶金熔合。</div>
+            <div class="dialogue-bubble student"><strong>你的判断：</strong>这更像哪一种失效？</div>
+            <div class="case-options">
+                <button type="button" class="case-option-btn" data-value="hip">HIP 枕头效应</button>
+                <button type="button" class="case-option-btn" data-value="void">Kirkendall 空洞</button>
+                <button type="button" class="case-option-btn" data-value="bridge">桥连短路</button>
+            </div>
+            <div class="case-feedback"></div>
         </div>
 
-        <div class="section-card">
-            <h3 class="section-title">🎯 复杂场景封装选型挑战</h3>
-            <p style="font-size:13px; color:#64748b;">工程任务：设计一款用于深空探测卫星的核心控制机主板，芯片引脚数 800+，服役环境伴随极其严酷的极高/极低温剧烈交变（$\Delta T > 150^\circ\text{C}$），不允许板级返修，首选何种封装？</p>
-            <select id="selectDesign" class="select-input">
+        <div class="dialogue-case" data-case="fa2" data-answer="thermal">
+            <span class="case-label">场景 2</span>
+            <div class="dialogue-bubble teacher"><strong>可靠性工程师：</strong>样品通过回流后初测正常，但经历 -55 到 125 °C 温度循环后，角部焊点出现贯穿裂纹，中心焊点基本完好。</div>
+            <div class="dialogue-bubble student"><strong>你的判断：</strong>最可能的底层驱动力是什么？</div>
+            <div class="case-options">
+                <button type="button" class="case-option-btn" data-value="thermal">CTE 错配导致热疲劳裂纹</button>
+                <button type="button" class="case-option-btn" data-value="popcorn">吸湿爆米花效应</button>
+                <button type="button" class="case-option-btn" data-value="hip">回流翘曲导致 HIP</button>
+            </div>
+            <div class="case-feedback"></div>
+        </div>
+
+        <div class="dialogue-case" data-case="fa3" data-answer="kirkendall">
+            <span class="case-label">场景 3</span>
+            <div class="dialogue-bubble teacher"><strong>材料工程师：</strong>长期高温老化后，Cu3Sn 与 Cu 衬垫附近出现一串微小空洞，界面剪切强度明显下降。</div>
+            <div class="dialogue-bubble student"><strong>你的判断：</strong>这类空洞的形成机制是什么？</div>
+            <div class="case-options">
+                <button type="button" class="case-option-btn" data-value="kirkendall">Cu/Sn 扩散通量不对称造成 Kirkendall 空洞</button>
+                <button type="button" class="case-option-btn" data-value="bridge">焊膏过量导致桥连</button>
+                <button type="button" class="case-option-btn" data-value="open">共面性差导致开路</button>
+            </div>
+            <div class="case-feedback"></div>
+        </div>
+    </div>
+
+    <div id="page-design" class="section-card module-page page">
+        <div class="page-toolbar">
+            <button type="button" class="back-home-btn">返回首页</button>
+            <div class="page-toolbar-actions">
+                <button type="button" class="small-reset-btn" id="btnResetDesign">清空本页答题记录</button>
+            </div>
+        </div>
+        <h3 class="section-title">🎯 复杂场景封装选型挑战</h3>
+
+        <div class="design-case" data-case="design1" data-answer="CGA">
+            <span class="case-label">任务 1</span>
+            <p style="font-size:13px; color:#64748b;">设计一款用于深空探测卫星的核心控制机主板，芯片引脚数 800+，服役环境伴随极其严酷的极高/极低温剧烈交变（$\Delta T > 150^\circ\text{C}$），不允许板级返修，首选何种封装？</p>
+            <select class="select-input design-select">
                 <option value="">-- 请评估并选择最适工艺 --</option>
                 <option value="BGA">塑料球栅阵列封装 (PBGA)</option>
                 <option value="CGA">陶瓷圆柱阵列封装 (CCGA)</option>
                 <option value="LGA">触点阵列封装 + 压接插座连接</option>
             </select>
-            <button class="interactive-btn" id="btnDesign">确认方案选型</button>
-            <div id="designFeedback" class="alert-info"></div>
+            <button type="button" class="interactive-btn design-check-btn">确认方案选型</button>
+            <div class="case-feedback"></div>
+        </div>
+
+        <div class="design-case" data-case="design2" data-answer="LGA">
+            <span class="case-label">任务 2</span>
+            <p style="font-size:13px; color:#64748b;">设计一款面向桌面级高性能 CPU 的主板平台，要求用户可更换处理器、便于售后维护，同时追求较低互连寄生电感。以下哪种方案更合适？</p>
+            <select class="select-input design-select">
+                <option value="">-- 请评估并选择最适工艺 --</option>
+                <option value="BGA">BGA 永久焊接到主板</option>
+                <option value="CGA">CGA 陶瓷柱阵列封装</option>
+                <option value="LGA">LGA 封装 + Socket 机械压接</option>
+            </select>
+            <button type="button" class="interactive-btn design-check-btn">确认方案选型</button>
+            <div class="case-feedback"></div>
         </div>
     </div>
 
-    <div class="section-card">
+    <div id="page-match" class="section-card module-page page">
+        <div class="page-toolbar">
+            <button type="button" class="back-home-btn">返回首页</button>
+            <div class="page-toolbar-actions">
+                <button type="button" class="small-reset-btn" id="btnResetMatchTop">清空本页答题记录</button>
+            </div>
+        </div>
         <h3 class="section-title">🧩 焊点失效模式配对小游戏</h3>
         <p class="match-intro">把右侧“成因 / 检测特征”拖到左侧对应失效现象旁；也可以先点选右侧卡片，再点左侧空槽完成配对。</p>
         <div class="match-board">
@@ -383,7 +535,13 @@
         <div id="matchFeedback" class="match-feedback"></div>
     </div>
 
-    <div class="section-card">
+    <div id="page-quiz" class="section-card module-page page">
+        <div class="page-toolbar">
+            <button type="button" class="back-home-btn">返回首页</button>
+            <div class="page-toolbar-actions">
+                <button type="button" class="small-reset-btn" id="btnResetQuizTop">清空本页答题记录</button>
+            </div>
+        </div>
         <h3 class="section-title">📝 随堂核心概念通关测试（选项即点即评）</h3>
         <form id="quizForm">
             <div class="question-card" id="q1" data-answer="B">
@@ -474,7 +632,7 @@
                 <div class="feedback"></div>
             </div>
         </form>
-        <button type="button" class="reset-btn" id="btnReset">清空所有答题纪录</button>
+        <button type="button" class="reset-btn" id="btnReset">清空本页答题记录</button>
     </div>
 </div>
 
@@ -528,6 +686,14 @@
     let selectedCauseCard = null;
 
     document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('[data-target]').forEach(button => {
+            button.addEventListener('click', () => showPage(button.getAttribute('data-target')));
+        });
+
+        document.querySelectorAll('.back-home-btn').forEach(button => {
+            button.addEventListener('click', () => showPage('homePage'));
+        });
+
         // 绑定卡片切换
         document.querySelectorAll('.structure-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -551,10 +717,18 @@
         document.getElementById('tempSlider').addEventListener('input', runCteSimulation);
         document.getElementById('underfillCheckbox').addEventListener('change', runCteSimulation);
         document.getElementById('imcSlider').addEventListener('input', runImcEvolution);
-        document.getElementById('btnFA').addEventListener('click', evaluateFA);
-        document.getElementById('btnDesign').addEventListener('click', evaluateDesign);
+        document.querySelectorAll('.dialogue-case .case-option-btn').forEach(button => {
+            button.addEventListener('click', () => evaluateDialogueCase(button));
+        });
+        document.querySelectorAll('.design-check-btn').forEach(button => {
+            button.addEventListener('click', () => evaluateDesignCase(button));
+        });
+        document.getElementById('btnResetFA').addEventListener('click', resetFaCases);
+        document.getElementById('btnResetDesign').addEventListener('click', resetDesignCases);
         document.getElementById('btnCheckMatch').addEventListener('click', checkFailureMatches);
         document.getElementById('btnResetMatch').addEventListener('click', resetFailureMatchGame);
+        document.getElementById('btnResetMatchTop').addEventListener('click', resetFailureMatchGame);
+        document.getElementById('btnResetQuizTop').addEventListener('click', resetQuiz);
         document.getElementById('btnReset').addEventListener('click', resetQuiz);
 
         // 默认初始化
@@ -647,6 +821,15 @@
 
     function initRadarCanvas() {
         drawRadarChart(currentRadarType);
+    }
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        const target = document.getElementById(pageId);
+        if (target) target.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (pageId === 'page-explore') drawRadarChart(currentRadarType);
+        if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
 
     function switchExplore(type) {
@@ -777,43 +960,81 @@
         if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
     }
 
-    function evaluateFA() {
-        const val = document.getElementById('faSelect').value;
-        const box = document.getElementById('faFeedback');
-        box.style.display = 'block';
-        if (val === 'hip') {
-            box.className = "alert-info";
-            box.style.backgroundColor = "#dcfce7";
-            box.style.color = "#14532d";
-            box.innerHTML = `🎉 <strong>完全正确！</strong> 这正是典型的<strong>枕头效应（Head-in-Pillow）</strong>。多由元器件在回流焊高温下发生动态翘曲，导致焊球与锡膏垫在熔融期分离、表面氧化无法融合，冷却曲率平复后仅形成像枕头般的机械虚接触。`;
-        } else if (val === "") {
-            box.style.display = 'none';
+    const faCaseFeedback = {
+        fa1: {
+            correct: "🎉 判断正确。HIP 的关键线索是回流过程中焊球与锡膏暂时分离，冷却后只有机械接触或局部虚接，而不是完整冶金结合。",
+            wrong: "还需要再看现象关键词：像“枕头叠放”、未完全熔合、回流翘曲分离，更指向 HIP 枕头效应。"
+        },
+        fa2: {
+            correct: "🎉 判断正确。温度循环后角部焊点优先开裂，是 CTE 错配、DNP 较大和循环剪切应变共同作用的典型表现。",
+            wrong: "注意失效发生在温度循环之后，且角焊点先坏、中心焊点较好，这更像热机械疲劳而不是单次回流缺陷。"
+        },
+        fa3: {
+            correct: "🎉 判断正确。Cu 与 Sn 的扩散速率不对称会留下空位，空位聚集后形成 Kirkendall 空洞，削弱界面强度。",
+            wrong: "这里的关键词是长期热老化、Cu3Sn/Cu 界面和微空洞，重点应放在扩散通量不对称。"
+        }
+    };
+
+    function evaluateDialogueCase(button) {
+        const card = button.closest('.dialogue-case');
+        const answer = card.dataset.answer;
+        const caseId = card.dataset.case;
+        const feedback = card.querySelector('.case-feedback');
+        const isCorrect = button.dataset.value === answer;
+
+        card.querySelectorAll('.case-option-btn').forEach(option => {
+            option.classList.remove('correct-choice', 'wrong-choice');
+            if (option.dataset.value === answer) option.classList.add('correct-choice');
+        });
+        if (!isCorrect) button.classList.add('wrong-choice');
+
+        feedback.style.display = 'block';
+        feedback.style.backgroundColor = isCorrect ? '#dcfce7' : '#fee2e2';
+        feedback.style.color = isCorrect ? '#14532d' : '#7f1d1d';
+        feedback.innerHTML = isCorrect ? faCaseFeedback[caseId].correct : faCaseFeedback[caseId].wrong;
+    }
+
+    function resetFaCases() {
+        document.querySelectorAll('.dialogue-case').forEach(card => {
+            card.querySelectorAll('.case-option-btn').forEach(button => button.classList.remove('correct-choice', 'wrong-choice'));
+            const feedback = card.querySelector('.case-feedback');
+            feedback.style.display = 'none';
+            feedback.innerHTML = '';
+        });
+    }
+
+    function evaluateDesignCase(button) {
+        const card = button.closest('.design-case');
+        const select = card.querySelector('.design-select');
+        const feedback = card.querySelector('.case-feedback');
+        const val = select.value;
+        const answer = card.dataset.answer;
+
+        feedback.style.display = val ? 'block' : 'none';
+        if (!val) return;
+
+        const isCorrect = val === answer;
+        feedback.style.backgroundColor = isCorrect ? '#dcfce7' : '#fee2e2';
+        feedback.style.color = isCorrect ? '#14532d' : '#7f1d1d';
+
+        if (card.dataset.case === 'design1') {
+            feedback.innerHTML = isCorrect
+                ? `🎉 <strong>绝佳方案！</strong>航天级剧烈温度循环下，CGA/CCGA 的高纵横比焊料柱能释放 CTE 错配造成的大剪切应力。`
+                : `❌ 该场景重点是高可靠、强温变、不可返修。普通 BGA 疲劳风险高，LGA 机械接触也不适合强振动与不可返修约束。`;
         } else {
-            box.className = "alert-info";
-            box.style.backgroundColor = "#fee2e2";
-            box.style.color = "#7f1d1d";
-            box.innerHTML = `❌ <strong>断定错误。</strong>提示：样品表现为“接触分离但并未发生重熔冶金”，表明属于典型的工艺级虚焊失效，请修正结论。`;
+            feedback.innerHTML = isCorrect
+                ? `🎉 <strong>选择合理！</strong>LGA + Socket 适合可更换 CPU，互连高度低、寄生参数小，也便于维护升级。`
+                : `❌ 该场景强调“可更换”和“维护方便”。永久焊接类封装不如 LGA + Socket 符合产品需求。`;
         }
     }
 
-    function evaluateDesign() {
-        const val = document.getElementById('selectDesign').value;
-        const box = document.getElementById('designFeedback');
-        box.style.display = 'block';
-        if (val === 'CGA') {
-            box.className = "alert-info";
-            box.style.backgroundColor = "#dcfce7";
-            box.style.color = "#14532d";
-            box.innerHTML = `🎉 <strong>绝佳方案！</strong>在宇航级高可靠场景中，陶瓷基板与 FR-4 的大范围 $\\Delta T$ 循环会导致严重的 CTE 剪切应力。普通 BGA 极其脆弱极易崩溃；LGA 机械接触则易受强振动干扰瞬断。采用 <strong>CGA（CCGA）</strong> 封装，高纵横比焊料柱具有优异的柔顺性，是目前不可替代的核心技术。`;
-        } else if (val === "") {
-            box.style.display = 'none';
-        } else {
-            box.className = "alert-info";
-            box.style.backgroundColor = "#fee2e2";
-            box.style.color = "#7f1d1d";
-            box.innerHTML = `❌ <strong>方案存在早期失效隐患。</strong>提示：重点关注“航天级、剧烈温度循环、严禁返修”的刚性工程束缚，BGA 与接触式 LGA 极易因剪切剪断或应力疲劳而提前损坏。`;
-        }
-        if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset();
+    function resetDesignCases() {
+        document.querySelectorAll('.design-case').forEach(card => {
+            card.querySelector('.design-select').value = '';
+            const feedback = card.querySelector('.case-feedback');
+            feedback.style.display = 'none';
+            feedback.innerHTML = '';
+        });
     }
 
     function initFailureMatchGame() {
@@ -993,19 +1214,13 @@
         document.querySelectorAll('.question-card').forEach(card => card.classList.remove('locked'));
         document.querySelectorAll('.option-item').forEach(item => item.className = 'option-item');
         document.querySelectorAll('.feedback').forEach(f => f.style.display = 'none');
-        document.getElementById('faFeedback').style.display = 'none';
-        document.getElementById('designFeedback').style.display = 'none';
-        document.getElementById('faSelect').value = "";
-        document.getElementById('selectDesign').value = "";
         document.getElementById('tempSlider').value = 25;
         document.getElementById('imcSlider').value = 0;
         document.getElementById('underfillCheckbox').checked = false;
         
-        resetFailureMatchGame();
         runCteSimulation();
         runImcEvolution();
         switchExplore('bga');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
 </body>
